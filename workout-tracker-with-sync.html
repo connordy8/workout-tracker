@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Workout">
+  <title>Workout Tracker</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #333;
+    }
+    
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .workout-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      flex: 1;
+      padding-right: 10px;
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .skip-btn, .settings-btn {
+      background: transparent;
+      border: 1px solid #666;
+      color: #999;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .settings-btn {
+      padding: 8px 12px;
+    }
+    
+    .skip-btn:active, .settings-btn:active {
+      background: #333;
+    }
+    
+    .category-badge {
+      display: inline-block;
+      background: #4a9eff;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .category-badge.cardio {
+      background: #22c55e;
+    }
+    
+    .category-badge.mixed {
+      background: #f59e0b;
+    }
+    
+    .sync-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 10px;
+      font-size: 12px;
+      color: #888;
+    }
+    
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #666;
+    }
+    
+    .sync-dot.connected {
+      background: #22c55e;
+    }
+    
+    .section {
+      margin: 16px;
+    }
+    
+    .section-title {
+      color: #888;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding-left: 4px;
+    }
+    
+    .exercise-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #2a2a2a;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .exercise-card:active {
+      background: #252525;
+      transform: scale(0.98);
+    }
+    
+    .exercise-card.logged {
+      border-color: #22c55e;
+    }
+    
+    .exercise-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    
+    .exercise-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      flex: 1;
+    }
+    
+    .exercise-target {
+      color: #4a9eff;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .exercise-last {
+      color: #888;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    
+    .exercise-notes {
+      color: #666;
+      font-size: 12px;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    
+    .complete-btn {
+      position: fixed;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      left: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #4a9eff 0%, #3b82f6 100%);
+      color: #fff;
+      border: none;
+      padding: 18px;
+      border-radius: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(74, 158, 255, 0.3);
+    }
+    
+    .complete-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .complete-btn:disabled {
+      background: #333;
+      box-shadow: none;
+    }
+    
+    .complete-btn.syncing {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    
+    .modal {
+      background: #1a1a1a;
+      width: 100%;
+      max-height: 90vh;
+      border-radius: 20px 20px 0 0;
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    
+    .modal-header {
+      background: #252525;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: #333;
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      max-height: calc(90vh - 160px);
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    .input-label {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .input-row {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .input-field {
+      flex: 1;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px;
+      color: #fff;
+      font-size: 16px;
+      text-align: center;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+    
+    .input-field-wide {
+      width: 100%;
+      text-align: left;
+    }
+    
+    .set-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #252525;
+      border-radius: 10px;
+    }
+    
+    .set-label {
+      color: #888;
+      font-size: 14px;
+      width: 50px;
+    }
+    
+    .set-input {
+      flex: 1;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      color: #fff;
+      font-size: 16px;
+      text-align: center;
+    }
+    
+    .set-input:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+    
+    .set-x {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .add-set-btn {
+      width: 100%;
+      background: transparent;
+      border: 2px dashed #333;
+      color: #666;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    
+    .add-set-btn:active {
+      background: #252525;
+    }
+    
+    .last-performance {
+      background: #252525;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    
+    .last-performance-title {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    
+    .last-performance-value {
+      color: #4a9eff;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    
+    .modal-notes {
+      background: #252525;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+    
+    .modal-notes-title {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    
+    .modal-notes-text {
+      color: #ccc;
+      font-size: 14px;
+    }
+    
+    .modal-footer {
+      padding: 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      border-top: 1px solid #333;
+    }
+    
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #fff;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .save-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .progress-indicator {
+      display: flex;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 4px;
+      background: #333;
+    }
+    
+    .progress-dot.active {
+      background: #4a9eff;
+    }
+    
+    .progress-dot.completed {
+      background: #22c55e;
+    }
+    
+    .check-icon {
+      color: #22c55e;
+      font-size: 18px;
+      margin-left: 8px;
+    }
+    
+    .warmup-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      border: 1px solid #2a2a2a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .warmup-name {
+      font-size: 15px;
+      color: #ccc;
+    }
+    
+    .warmup-duration {
+      color: #666;
+      font-size: 13px;
+    }
+    
+    /* Settings Modal */
+    .settings-section {
+      margin-bottom: 24px;
+    }
+    
+    .settings-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .settings-description {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    
+    .settings-input {
+      width: 100%;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px;
+      color: #fff;
+      font-size: 14px;
+    }
+    
+    .settings-input:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+    
+    .settings-input::placeholder {
+      color: #666;
+    }
+    
+    .test-btn {
+      width: 100%;
+      background: #333;
+      border: none;
+      color: #fff;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    
+    .test-btn:active {
+      background: #444;
+    }
+    
+    .test-result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .test-result.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    
+    .test-result.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 14px;
+      z-index: 300;
+      animation: fadeInOut 3s ease;
+    }
+    
+    .toast.success {
+      background: #22c55e;
+    }
+    
+    .toast.error {
+      background: #ef4444;
+    }
+    
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(20px); }
+      15% { opacity: 1; transform: translateY(0); }
+      85% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+    
+    // ==================== WORKOUT DATA ====================
+    
+    const WARMUP_EXERCISES = [
+      { id: "diaphragmatic-breathing", name: "Diaphragmatic Breathing", defaultSets: 1, defaultReps: "2-3 min", notes: "Lying down, expand rib cage 360°, full exhale through pursed lips", type: "timed" },
+      { id: "toe-yoga", name: "Toe Yoga", defaultSets: 1, defaultReps: "2 min", notes: "Big toe up/others down, then reverse, then 'piano'", type: "timed" },
+      { id: "single-leg-balance", name: "Single-Leg Balance", defaultSets: 2, defaultReps: "30 sec each", notes: "Eyes open; progress to 15 sec eyes closed", type: "timed" },
+      { id: "dead-hang-warmup", name: "Dead Hang", defaultSets: 1, defaultReps: "30-60 sec", notes: "", type: "timed" }
+    ];
+    
+    const WORKOUTS = [
+      {
+        id: "lower-body-a",
+        name: "Lower Body A: Deadlift Focus",
+        category: "Strength",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Compounds", exercises: [
+            { id: "trap-bar-deadlift", name: "Trap Bar Deadlift", defaultSets: 4, defaultReps: "6-8", notes: "", type: "weighted" },
+            { id: "goblet-squat", name: "Goblet Squat", defaultSets: 3, defaultReps: "10-12", notes: "", type: "weighted" },
+            { id: "hip-thrust", name: "Hip Thrust", defaultSets: 3, defaultReps: "10-12", notes: "", type: "weighted" },
+            { id: "step-ups", name: "Step-Ups", defaultSets: 3, defaultReps: "8 each leg", notes: "3-sec lowering", type: "weighted" }
+          ]},
+          { name: "Hypertrophy", exercises: [
+            { id: "leg-extension", name: "Leg Extension", defaultSets: 3, defaultReps: "12-15", notes: "Full ROM, slow eccentric", type: "weighted" },
+            { id: "lying-leg-curl", name: "Lying Leg Curl", defaultSets: 3, defaultReps: "10-12", notes: "", type: "weighted" },
+            { id: "standing-calf-raise", name: "Standing Calf Raise", defaultSets: 3, defaultReps: "12-15", notes: "Deep stretch at bottom", type: "weighted" }
+          ]},
+          { name: "Grip Work", exercises: [
+            { id: "farmers-carry", name: "Farmer's Carry", defaultSets: 2, defaultReps: "1 min", notes: "Goal: 50% bodyweight each hand", type: "weighted" }
+          ]}
+        ]
+      },
+      {
+        id: "zone-2-cardio",
+        name: "Zone 2 Cardio",
+        category: "Cardio",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Cardio", exercises: [
+            { id: "zone-2-session", name: "Zone 2 Cardio", defaultSets: 1, defaultReps: "45-60 min", notes: "Cycling, incline treadmill (15%, 3.0-3.4 mph), rowing, or rucking. HR: 115-140 bpm. Steady state.", type: "cardio" }
+          ]}
+        ]
+      },
+      {
+        id: "upper-body-a",
+        name: "Upper Body A: Pull Focus",
+        category: "Strength",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Compounds", exercises: [
+            { id: "chin-ups", name: "Chin-Ups", defaultSets: 4, defaultReps: "6-10", notes: "Supinated grip", type: "bodyweight" },
+            { id: "barbell-row", name: "Barbell Row", defaultSets: 4, defaultReps: "8-10", notes: "Elbows tucked", type: "weighted" },
+            { id: "overhead-press", name: "Overhead Press", defaultSets: 3, defaultReps: "8-10", notes: "", type: "weighted" },
+            { id: "dumbbell-bench-press", name: "Dumbbell Bench Press", defaultSets: 3, defaultReps: "10-12", notes: "", type: "weighted" }
+          ]},
+          { name: "Hypertrophy", exercises: [
+            { id: "incline-dumbbell-curl", name: "Incline Dumbbell Curl", defaultSets: 3, defaultReps: "10-12", notes: "Long head stretch", type: "weighted" },
+            { id: "overhead-tricep-extension", name: "Overhead Tricep Extension", defaultSets: 3, defaultReps: "12-15", notes: "Cable or dumbbell", type: "weighted" },
+            { id: "lateral-raise", name: "Lateral Raise", defaultSets: 3, defaultReps: "15-20", notes: "", type: "weighted" },
+            { id: "face-pulls", name: "Face Pulls", defaultSets: 3, defaultReps: "15-20", notes: "", type: "weighted" }
+          ]},
+          { name: "Grip Work", exercises: [
+            { id: "dead-hang", name: "Dead Hang", defaultSets: 2, defaultReps: "max time", notes: "Goal: 2 minutes", type: "timed" }
+          ]}
+        ]
+      },
+      {
+        id: "zone-2-cardio-2",
+        name: "Zone 2 Cardio",
+        category: "Cardio",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Cardio", exercises: [
+            { id: "zone-2-session-2", name: "Zone 2 Cardio", defaultSets: 1, defaultReps: "45-60 min", notes: "Cycling, incline treadmill (15%, 3.0-3.4 mph), rowing, or rucking. HR: 115-140 bpm. Steady state.", type: "cardio" }
+          ]}
+        ]
+      },
+      {
+        id: "lower-body-b",
+        name: "Lower Body B: Squat Focus",
+        category: "Strength",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Compounds", exercises: [
+            { id: "back-squat", name: "Back Squat", defaultSets: 4, defaultReps: "8-10", notes: "Full depth", type: "weighted" },
+            { id: "romanian-deadlift", name: "Romanian Deadlift", defaultSets: 3, defaultReps: "8-10", notes: "", type: "weighted" },
+            { id: "walking-lunges", name: "Walking Lunges", defaultSets: 3, defaultReps: "12 each leg", notes: "", type: "weighted" }
+          ]},
+          { name: "Hypertrophy", exercises: [
+            { id: "leg-extension-b", name: "Leg Extension", defaultSets: 3, defaultReps: "12-15", notes: "", type: "weighted" },
+            { id: "seated-leg-curl", name: "Seated Leg Curl", defaultSets: 3, defaultReps: "12-15", notes: "", type: "weighted" },
+            { id: "standing-calf-raise-b", name: "Standing Calf Raise", defaultSets: 3, defaultReps: "15-20", notes: "Emphasize stretch", type: "weighted" },
+            { id: "seated-calf-raise", name: "Seated Calf Raise", defaultSets: 2, defaultReps: "15-20", notes: "Soleus focus", type: "weighted" }
+          ]},
+          { name: "Grip Work", exercises: [
+            { id: "farmers-carry-b", name: "Farmer's Carry", defaultSets: 2, defaultReps: "1 min", notes: "", type: "weighted" }
+          ]}
+        ]
+      },
+      {
+        id: "zone-2-vo2max",
+        name: "Zone 2 + VO2 Max",
+        category: "Cardio",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Zone 2", exercises: [
+            { id: "zone-2-saturday", name: "Zone 2 Cardio", defaultSets: 1, defaultReps: "45 min", notes: "Steady state", type: "cardio" }
+          ]},
+          { name: "VO2 Max", exercises: [
+            { id: "vo2max-intervals", name: "4x4 VO2 Max Intervals", defaultSets: 4, defaultReps: "4 min on / 4 min off", notes: "StairMaster, bike, or rower. 4-6 rounds total.", type: "cardio" }
+          ]}
+        ]
+      },
+      {
+        id: "zone-2-upper-b",
+        name: "Zone 2 + Upper Body B",
+        category: "Cardio + Strength",
+        sections: [
+          { name: "Warm-Up", exercises: WARMUP_EXERCISES, isWarmup: true },
+          { name: "Zone 2", exercises: [
+            { id: "zone-2-sunday", name: "Zone 2 Cardio", defaultSets: 1, defaultReps: "45-60 min", notes: "", type: "cardio" }
+          ]},
+          { name: "Compounds", exercises: [
+            { id: "pull-ups", name: "Pull-Ups", defaultSets: 3, defaultReps: "max", notes: "Pronated grip", type: "bodyweight" },
+            { id: "cable-row", name: "Cable Row", defaultSets: 3, defaultReps: "12", notes: "Squeeze scapula", type: "weighted" },
+            { id: "dumbbell-bench-or-pushups", name: "DB Bench or Push-Ups", defaultSets: 3, defaultReps: "12-15", notes: "", type: "weighted" }
+          ]},
+          { name: "Hypertrophy", exercises: [
+            { id: "concentration-curl", name: "Concentration Curl", defaultSets: 3, defaultReps: "10-12", notes: "Short head focus", type: "weighted" },
+            { id: "tricep-pushdown", name: "Tricep Pushdown", defaultSets: 3, defaultReps: "12-15", notes: "Rope attachment", type: "weighted" },
+            { id: "rear-delt-fly", name: "Rear Delt Fly", defaultSets: 3, defaultReps: "15-20", notes: "Or reverse pec deck", type: "weighted" },
+            { id: "shrugs", name: "Shrugs", defaultSets: 3, defaultReps: "12-15", notes: "", type: "weighted" }
+          ]},
+          { name: "Grip Work", exercises: [
+            { id: "dead-hang-sunday", name: "Dead Hang", defaultSets: 2, defaultReps: "max time", notes: "", type: "timed" }
+          ]}
+        ]
+      }
+    ];
+    
+    // ==================== APP COMPONENT ====================
+    
+    function App() {
+      const [currentWorkoutIndex, setCurrentWorkoutIndex] = useState(() => {
+        const saved = localStorage.getItem('currentWorkoutIndex');
+        return saved ? parseInt(saved, 10) : 0;
+      });
+      
+      const [exerciseLogs, setExerciseLogs] = useState(() => {
+        const saved = localStorage.getItem('exerciseLogs');
+        return saved ? JSON.parse(saved) : {};
+      });
+      
+      const [sessionLogs, setSessionLogs] = useState({});
+      const [selectedExercise, setSelectedExercise] = useState(null);
+      const [showSettings, setShowSettings] = useState(false);
+      const [isSyncing, setIsSyncing] = useState(false);
+      const [toast, setToast] = useState(null);
+      
+      const [googleScriptUrl, setGoogleScriptUrl] = useState(() => {
+        return localStorage.getItem('googleScriptUrl') || '';
+      });
+      
+      useEffect(() => {
+        localStorage.setItem('currentWorkoutIndex', currentWorkoutIndex.toString());
+      }, [currentWorkoutIndex]);
+      
+      useEffect(() => {
+        localStorage.setItem('exerciseLogs', JSON.stringify(exerciseLogs));
+      }, [exerciseLogs]);
+      
+      useEffect(() => {
+        localStorage.setItem('googleScriptUrl', googleScriptUrl);
+      }, [googleScriptUrl]);
+      
+      const currentWorkout = WORKOUTS[currentWorkoutIndex];
+      
+      const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+      };
+      
+      const syncToGoogleSheets = async (workoutData) => {
+        if (!googleScriptUrl) return true; // No URL configured, skip sync
+        
+        try {
+          const response = await fetch(googleScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Google Apps Script requires this
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(workoutData)
+          });
+          
+          // With no-cors, we can't read the response, but if it didn't throw, it likely worked
+          return true;
+        } catch (error) {
+          console.error('Sync error:', error);
+          return false;
+        }
+      };
+      
+      const advanceWorkout = () => {
+        setCurrentWorkoutIndex((prev) => (prev + 1) % WORKOUTS.length);
+        setSessionLogs({});
+      };
+      
+      const completeWorkout = async () => {
+        setIsSyncing(true);
+        
+        // Prepare data for Google Sheets
+        const exercises = [];
+        
+        currentWorkout.sections.forEach(section => {
+          if (section.isWarmup) return;
+          
+          section.exercises.forEach(exercise => {
+            const log = sessionLogs[exercise.id];
+            if (log) {
+              exercises.push({
+                section: section.name,
+                name: exercise.name,
+                ...log
+              });
+            }
+          });
+        });
+        
+        const workoutData = {
+          workoutName: currentWorkout.name,
+          exercises
+        };
+        
+        // Save locally first
+        const newLogs = { ...exerciseLogs };
+        const timestamp = new Date().toISOString();
+        
+        Object.entries(sessionLogs).forEach(([exerciseId, data]) => {
+          if (!newLogs[exerciseId]) {
+            newLogs[exerciseId] = [];
+          }
+          newLogs[exerciseId].push({
+            date: timestamp,
+            ...data
+          });
+        });
+        
+        setExerciseLogs(newLogs);
+        
+        // Sync to Google Sheets
+        if (googleScriptUrl && exercises.length > 0) {
+          const syncSuccess = await syncToGoogleSheets(workoutData);
+          if (syncSuccess) {
+            showToast('Workout saved & synced! 💪', 'success');
+          } else {
+            showToast('Saved locally, sync failed', 'error');
+          }
+        } else {
+          showToast('Workout complete! 💪', 'success');
+        }
+        
+        setIsSyncing(false);
+        advanceWorkout();
+      };
+      
+      const getLastLog = (exerciseId) => {
+        const logs = exerciseLogs[exerciseId];
+        if (!logs || logs.length === 0) return null;
+        return logs[logs.length - 1];
+      };
+      
+      const formatLastLog = (exerciseId, exercise) => {
+        const lastLog = getLastLog(exerciseId);
+        if (!lastLog) return "No previous data";
+        
+        if (exercise.type === 'cardio' || exercise.type === 'timed') {
+          return lastLog.duration || lastLog.notes || "Completed";
+        }
+        
+        if (lastLog.sets && lastLog.sets.length > 0) {
+          const setStrings = lastLog.sets.map(s => {
+            if (s.weight && s.reps) return `${s.weight}×${s.reps}`;
+            if (s.reps) return `${s.reps} reps`;
+            if (s.duration) return s.duration;
+            return '';
+          }).filter(Boolean);
+          return setStrings.join(', ') || "Completed";
+        }
+        
+        return "Completed";
+      };
+      
+      const saveExerciseLog = (exerciseId, data) => {
+        setSessionLogs(prev => ({
+          ...prev,
+          [exerciseId]: data
+        }));
+        setSelectedExercise(null);
+      };
+      
+      const isExerciseLogged = (exerciseId) => {
+        return !!sessionLogs[exerciseId];
+      };
+      
+      const getCategoryClass = (category) => {
+        if (category === 'Cardio') return 'cardio';
+        if (category.includes('+')) return 'mixed';
+        return '';
+      };
+      
+      return (
+        <div>
+          <header className="header">
+            <div className="header-top">
+              <h1 className="workout-name">{currentWorkout.name}</h1>
+              <div className="header-buttons">
+                <button className="settings-btn" onClick={() => setShowSettings(true)}>⚙️</button>
+                <button className="skip-btn" onClick={advanceWorkout}>Skip</button>
+              </div>
+            </div>
+            <span className={`category-badge ${getCategoryClass(currentWorkout.category)}`}>
+              {currentWorkout.category}
+            </span>
+            <span className="sync-status">
+              <span className={`sync-dot ${googleScriptUrl ? 'connected' : ''}`}></span>
+              {googleScriptUrl ? 'Syncing to Sheets' : 'Local only'}
+            </span>
+            <div className="progress-indicator">
+              {WORKOUTS.map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`progress-dot ${i === currentWorkoutIndex ? 'active' : ''} ${i < currentWorkoutIndex ? 'completed' : ''}`}
+                />
+              ))}
+            </div>
+          </header>
+          
+          {currentWorkout.sections.map((section, sIdx) => (
+            <div key={sIdx} className="section">
+              <h2 className="section-title">{section.name}</h2>
+              
+              {section.isWarmup ? (
+                section.exercises.map((exercise, eIdx) => (
+                  <div key={eIdx} className="warmup-card">
+                    <span className="warmup-name">{exercise.name}</span>
+                    <span className="warmup-duration">{exercise.defaultReps}</span>
+                  </div>
+                ))
+              ) : (
+                section.exercises.map((exercise, eIdx) => (
+                  <div 
+                    key={eIdx} 
+                    className={`exercise-card ${isExerciseLogged(exercise.id) ? 'logged' : ''}`}
+                    onClick={() => setSelectedExercise(exercise)}
+                  >
+                    <div className="exercise-header">
+                      <span className="exercise-name">
+                        {exercise.name}
+                        {isExerciseLogged(exercise.id) && <span className="check-icon">✓</span>}
+                      </span>
+                      <span className="exercise-target">
+                        {exercise.defaultSets} × {exercise.defaultReps}
+                      </span>
+                    </div>
+                    <div className="exercise-last">
+                      Last: {formatLastLog(exercise.id, exercise)}
+                    </div>
+                    {exercise.notes && (
+                      <div className="exercise-notes">{exercise.notes}</div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          ))}
+          
+          <button 
+            className={`complete-btn ${isSyncing ? 'syncing' : ''}`} 
+            onClick={completeWorkout}
+            disabled={isSyncing}
+          >
+            {isSyncing ? 'Syncing...' : 'Complete Workout'}
+          </button>
+          
+          {selectedExercise && (
+            <ExerciseModal
+              exercise={selectedExercise}
+              lastLog={getLastLog(selectedExercise.id)}
+              currentLog={sessionLogs[selectedExercise.id]}
+              onSave={(data) => saveExerciseLog(selectedExercise.id, data)}
+              onClose={() => setSelectedExercise(null)}
+            />
+          )}
+          
+          {showSettings && (
+            <SettingsModal
+              googleScriptUrl={googleScriptUrl}
+              setGoogleScriptUrl={setGoogleScriptUrl}
+              onClose={() => setShowSettings(false)}
+              showToast={showToast}
+            />
+          )}
+          
+          {toast && (
+            <div className={`toast ${toast.type}`}>
+              {toast.message}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // ==================== EXERCISE MODAL ====================
+    
+    function ExerciseModal({ exercise, lastLog, currentLog, onSave, onClose }) {
+      const [sets, setSets] = useState(() => {
+        if (currentLog && currentLog.sets) {
+          return currentLog.sets;
+        }
+        
+        const numSets = exercise.defaultSets;
+        const defaultSets = [];
+        
+        for (let i = 0; i < numSets; i++) {
+          if (lastLog && lastLog.sets && lastLog.sets[i]) {
+            defaultSets.push({ ...lastLog.sets[i] });
+          } else {
+            defaultSets.push({ weight: '', reps: '' });
+          }
+        }
+        
+        return defaultSets;
+      });
+      
+      const [duration, setDuration] = useState(
+        currentLog?.duration || lastLog?.duration || ''
+      );
+      
+      const [notes, setNotes] = useState(
+        currentLog?.notes || ''
+      );
+      
+      const isCardioOrTimed = exercise.type === 'cardio' || exercise.type === 'timed';
+      
+      const updateSet = (index, field, value) => {
+        setSets(prev => {
+          const newSets = [...prev];
+          newSets[index] = { ...newSets[index], [field]: value };
+          return newSets;
+        });
+      };
+      
+      const addSet = () => {
+        setSets(prev => [...prev, { weight: '', reps: '' }]);
+      };
+      
+      const handleSave = () => {
+        if (isCardioOrTimed) {
+          onSave({ duration, notes });
+        } else {
+          onSave({ sets: sets.filter(s => s.weight || s.reps) });
+        }
+      };
+      
+      const formatLastLogDisplay = () => {
+        if (!lastLog) return "No previous data";
+        
+        if (isCardioOrTimed) {
+          return lastLog.duration || "Completed";
+        }
+        
+        if (lastLog.sets && lastLog.sets.length > 0) {
+          return lastLog.sets.map((s, i) => 
+            `Set ${i + 1}: ${s.weight || '-'}${s.weight ? ' lbs' : ''} × ${s.reps || '-'}`
+          ).join('\n');
+        }
+        
+        return "Completed";
+      };
+      
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">{exercise.name}</h2>
+              <button className="modal-close" onClick={onClose}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              {lastLog && (
+                <div className="last-performance">
+                  <div className="last-performance-title">Last Performance</div>
+                  <div className="last-performance-value" style={{ whiteSpace: 'pre-line' }}>
+                    {formatLastLogDisplay()}
+                  </div>
+                </div>
+              )}
+              
+              {exercise.notes && (
+                <div className="modal-notes">
+                  <div className="modal-notes-title">Notes</div>
+                  <div className="modal-notes-text">{exercise.notes}</div>
+                </div>
+              )}
+              
+              <div className="input-group">
+                <label className="input-label">
+                  Target: {exercise.defaultSets} × {exercise.defaultReps}
+                </label>
+              </div>
+              
+              {isCardioOrTimed ? (
+                <>
+                  <div className="input-group">
+                    <label className="input-label">Duration / Notes</label>
+                    <input
+                      type="text"
+                      className="input-field input-field-wide"
+                      placeholder="e.g., 45 min, 120 bpm avg"
+                      value={duration}
+                      onChange={e => setDuration(e.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {sets.map((set, i) => (
+                    <div key={i} className="set-row">
+                      <span className="set-label">Set {i + 1}</span>
+                      <input
+                        type="number"
+                        className="set-input"
+                        placeholder="lbs"
+                        value={set.weight}
+                        onChange={e => updateSet(i, 'weight', e.target.value)}
+                      />
+                      <span className="set-x">×</span>
+                      <input
+                        type="number"
+                        className="set-input"
+                        placeholder="reps"
+                        value={set.reps}
+                        onChange={e => updateSet(i, 'reps', e.target.value)}
+                      />
+                    </div>
+                  ))}
+                  <button className="add-set-btn" onClick={addSet}>
+                    + Add Set
+                  </button>
+                </>
+              )}
+            </div>
+            
+            <div className="modal-footer">
+              <button className="save-btn" onClick={handleSave}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ==================== SETTINGS MODAL ====================
+    
+    function SettingsModal({ googleScriptUrl, setGoogleScriptUrl, onClose, showToast }) {
+      const [urlInput, setUrlInput] = useState(googleScriptUrl);
+      const [testResult, setTestResult] = useState(null);
+      const [testing, setTesting] = useState(false);
+      
+      const testConnection = async () => {
+        if (!urlInput) {
+          setTestResult({ success: false, message: 'Please enter a URL first' });
+          return;
+        }
+        
+        setTesting(true);
+        setTestResult(null);
+        
+        try {
+          // With no-cors we can't verify the response, but we can check if the request goes through
+          await fetch(urlInput, {
+            method: 'GET',
+            mode: 'no-cors'
+          });
+          
+          setTestResult({ 
+            success: true, 
+            message: 'Connection looks good! (Note: Full verification happens on first workout sync)' 
+          });
+        } catch (error) {
+          setTestResult({ 
+            success: false, 
+            message: 'Connection failed. Check the URL and try again.' 
+          });
+        }
+        
+        setTesting(false);
+      };
+      
+      const handleSave = () => {
+        setGoogleScriptUrl(urlInput);
+        showToast('Settings saved!', 'success');
+        onClose();
+      };
+      
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Settings</h2>
+              <button className="modal-close" onClick={onClose}>×</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="settings-section">
+                <h3 className="settings-title">Google Sheets Sync</h3>
+                <p className="settings-description">
+                  Paste your Google Apps Script Web App URL below to automatically sync workouts to a Google Sheet.
+                </p>
+                
+                <input
+                  type="url"
+                  className="settings-input"
+                  placeholder="https://script.google.com/macros/s/..."
+                  value={urlInput}
+                  onChange={e => setUrlInput(e.target.value)}
+                />
+                
+                <button 
+                  className="test-btn" 
+                  onClick={testConnection}
+                  disabled={testing}
+                >
+                  {testing ? 'Testing...' : 'Test Connection'}
+                </button>
+                
+                {testResult && (
+                  <div className={`test-result ${testResult.success ? 'success' : 'error'}`}>
+                    {testResult.message}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button className="save-btn" onClick={handleSave}>
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
