@@ -426,10 +426,12 @@
       cursor: pointer;
       padding: 4px 8px;
     }
+    #sync-iframe { display: none; }
   </style>
 </head>
 <body>
   <div id="app"></div>
+  <iframe id="sync-iframe" name="sync-iframe"></iframe>
 
   <script>
     const SVG_ICONS = {
@@ -815,6 +817,29 @@
     function saveSettings() { state.googleUrl = document.getElementById('google-url').value; save(); showToast('Settings saved!'); closeModal(); }
     function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.optionalCardio = ''; state.extraCardios = []; save(); render(); }
 
+    // Form-based sync that works on Safari
+    function syncToGoogle(payload) {
+      return new Promise((resolve) => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = state.googleUrl;
+        form.target = 'sync-iframe';
+        
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'data';
+        input.value = JSON.stringify(payload);
+        form.appendChild(input);
+        
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+        
+        // Give it a moment to send
+        setTimeout(resolve, 500);
+      });
+    }
+
     async function completeWorkout() {
       state.syncing = true; render();
       const workout = WORKOUTS[state.workoutIndex];
@@ -828,14 +853,7 @@
         if (state.optionalCardio) exercises.push({ section: 'Optional Cardio', name: 'Cardio', type: 'cardio', duration: state.optionalCardio });
         state.extraCardios.forEach(cardio => { if (cardio.name || cardio.duration) exercises.push({ section: 'Additional Cardio', name: cardio.name || 'Extra Cardio', type: 'cardio', duration: cardio.duration }); });
         try {
-          const payload = JSON.stringify({ workoutName: workout.name, exercises });
-          let sent = false;
-          if (navigator.sendBeacon) {
-            sent = navigator.sendBeacon(state.googleUrl, new Blob([payload], { type: 'application/json' }));
-          }
-          if (!sent) {
-            await fetch(state.googleUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: payload });
-          }
+          await syncToGoogle({ workoutName: workout.name, exercises });
           showToast('Synced to Google Sheets! 💪');
         } catch (e) { showToast('Saved locally (sync failed)'); }
       } else { showToast('Workout complete! 💪'); }
