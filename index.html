@@ -281,7 +281,7 @@
       color: #22c55e;
       margin-top: 0;
     }
-    .bench-toggle {
+    .bench-toggle, .activity-toggle {
       flex: 1;
       background: #252525;
       border: 2px solid #333;
@@ -292,10 +292,15 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .bench-toggle.active {
+    .bench-toggle.active, .activity-toggle.active {
       background: #1a2a3a;
       border-color: #4a9eff;
       color: #4a9eff;
+    }
+    .activity-toggle.active-green {
+      background: #1a2a1a;
+      border-color: #22c55e;
+      color: #22c55e;
     }
     .save-btn {
       width: 100%;
@@ -373,14 +378,14 @@
     }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .hidden { display: none !important; }
-    .optional-cardio-section {
+    .additional-exercise-section {
       background: #1a2a1a;
       border: 1px solid #22c55e33;
       border-radius: 12px;
       padding: 14px;
       margin-top: 16px;
     }
-    .optional-cardio-title {
+    .additional-exercise-title {
       color: #22c55e;
       font-size: 13px;
       font-weight: 600;
@@ -426,6 +431,12 @@
       cursor: pointer;
       padding: 4px 8px;
     }
+    .activity-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
     #sync-iframe { display: none; }
   </style>
 </head>
@@ -456,7 +467,10 @@
       lunge: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="24" cy="6" r="4"/><path d="M24 10v8M20 18l-8 10v6M28 18l6 6v10"/></svg>`,
       shrug: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="10" r="4"/><path d="M20 14v12M16 26v10M24 26v10"/><path d="M12 12c0-4 4-4 8-4s8 0 8 4"/><rect x="6" y="14" width="4" height="10" rx="1" fill="currentColor" opacity="0.3"/><rect x="30" y="14" width="4" height="10" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
       hiit: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 4L10 22h10l-4 14 16-20H20l4-12z" fill="currentColor" opacity="0.3"/></svg>`,
-      reardelt: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="10" r="4"/><path d="M20 14v6l-4 8v8M20 20l4 8v8"/><path d="M12 16l-8 4M28 16l8 4"/><circle cx="4" cy="22" r="2" fill="currentColor"/><circle cx="36" cy="22" r="2" fill="currentColor"/></svg>`
+      reardelt: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="10" r="4"/><path d="M20 14v6l-4 8v8M20 20l4 8v8"/><path d="M12 16l-8 4M28 16l8 4"/><circle cx="4" cy="22" r="2" fill="currentColor"/><circle cx="36" cy="22" r="2" fill="currentColor"/></svg>`,
+      run: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="24" cy="6" r="4"/><path d="M20 12l-6 10M14 22l-6 12M20 12l8 4l6-4M28 16l-4 12l6 8"/></svg>`,
+      bike: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="28" r="6"/><circle cx="30" cy="28" r="6"/><path d="M10 28l8-12h8l4 12M18 16l-4 12M22 10l4-4"/><circle cx="26" cy="6" r="3"/></svg>`,
+      class: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="8" r="4"/><circle cx="8" cy="12" r="3"/><circle cx="32" cy="12" r="3"/><path d="M20 12v10M16 22l-4 12M24 22l4 12"/><path d="M8 15v8M32 15v8"/></svg>`
     };
     
     const EXERCISE_ICON_MAP = {
@@ -493,7 +507,7 @@
             { id: "farmers", name: "Farmer's Carry", sets: 2, reps: "1 min", notes: "50% BW each hand", type: "weighted" },
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ], hasOptionalCardio: true },
+        ], hasAdditionalExercise: true },
       { id: "zone2-1", name: "Zone 2 Cardio", category: "Cardio", sections: [
           { name: "Cardio", exercises: [
             { id: "zone2-a", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140. Bike, treadmill 15%, row, or ruck.", type: "cardio" }
@@ -515,7 +529,7 @@
           { name: "Grip", exercises: [
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ], hasOptionalCardio: true },
+        ], hasAdditionalExercise: true },
       { id: "zone2-2", name: "Zone 2 Cardio", category: "Cardio", sections: [
           { name: "Cardio", exercises: [
             { id: "zone2-b", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140. Steady state.", type: "cardio" }
@@ -537,7 +551,7 @@
             { id: "farmers-b", name: "Farmer's Carry", sets: 2, reps: "1 min", type: "weighted" },
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ], hasOptionalCardio: true },
+        ], hasAdditionalExercise: true },
       { id: "vo2max", name: "Zone 2 + VO2 Max", category: "Cardio", sections: [
           { name: "Zone 2", exercises: [
             { id: "zone2-sat", name: "Zone 2 Cardio", sets: 1, reps: "45 min", type: "cardio" }
@@ -564,7 +578,7 @@
           { name: "Grip", exercises: [
             { id: "hang-sun", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ], hasOptionalCardio: true }
+        ], hasAdditionalExercise: true }
     ];
 
     let state = {
@@ -575,7 +589,7 @@
       currentModal: null,
       syncing: false,
       toast: null,
-      optionalCardio: '',
+      additionalExercise: { type: '', customName: '', duration: '', notes: '' },
       extraCardios: []
     };
 
@@ -634,34 +648,44 @@
 
         ${workout.allowExtraCardio ? `
           <div class="section">
-            <h2 class="section-title">Additional Cardio</h2>
+            <h2 class="section-title">Additional Exercise</h2>
             ${state.extraCardios.map((cardio, i) => `
               <div class="extra-cardio-card ${cardio.duration ? 'logged' : ''}">
                 <div class="extra-cardio-header">
                   <div style="display:flex;align-items:center;gap:8px;">
-                    <div class="exercise-icon" style="width:36px;height:36px;padding:6px;">${SVG_ICONS.cardio}</div>
-                    <span class="extra-cardio-title">${cardio.name || 'Extra Cardio'}</span>
+                    <div class="exercise-icon" style="width:36px;height:36px;padding:6px;">${SVG_ICONS[cardio.type] || SVG_ICONS.cardio}</div>
+                    <span class="extra-cardio-title">${cardio.name || 'Additional Exercise'}</span>
                   </div>
                   <button class="remove-cardio-btn" onclick="removeExtraCardio(${i})">×</button>
                 </div>
-                <input type="text" class="cardio-input" placeholder="Activity name (e.g., Swimming)" 
-                  value="${cardio.name}" onchange="updateExtraCardio(${i}, 'name', this.value)" style="margin-bottom:8px">
-                <input type="text" class="cardio-input" placeholder="Duration (e.g., 30 min)" 
-                  value="${cardio.duration}" onchange="updateExtraCardio(${i}, 'duration', this.value)">
+                <div class="activity-buttons">
+                  <button class="activity-toggle ${cardio.type === 'run' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'run', 'Run')">🏃 Run</button>
+                  <button class="activity-toggle ${cardio.type === 'bike' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'bike', 'Bike')">🚴 Bike</button>
+                  <button class="activity-toggle ${cardio.type === 'class' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'class', 'Class')">🧘 Class</button>
+                  <button class="activity-toggle ${cardio.type === 'other' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'other', '')">✏️ Other</button>
+                </div>
+                ${cardio.type === 'other' ? `<input type="text" class="cardio-input" placeholder="Activity name" value="${cardio.name}" onchange="updateExtraCardio(${i}, 'name', this.value)" style="margin-bottom:8px">` : ''}
+                <input type="text" class="cardio-input" placeholder="Duration (e.g., 30 min)" value="${cardio.duration}" onchange="updateExtraCardio(${i}, 'duration', this.value)" style="margin-bottom:8px">
+                <input type="text" class="cardio-input" placeholder="Notes (optional)" value="${cardio.notes || ''}" onchange="updateExtraCardio(${i}, 'notes', this.value)">
               </div>
             `).join('')}
-            <button class="add-cardio-btn" onclick="addExtraCardio()">+ Add Another Cardio Activity</button>
+            <button class="add-cardio-btn" onclick="addExtraCardio()">+ Add Exercise</button>
           </div>
         ` : ''}
 
-        ${workout.hasOptionalCardio ? `
+        ${workout.hasAdditionalExercise ? `
           <div class="section">
-            <div class="optional-cardio-section">
-              <div class="optional-cardio-title"><span style="display:inline-flex;width:20px;height:20px;color:#22c55e;margin-right:4px;">${SVG_ICONS.cardio}</span> Optional Cardio</div>
-              <input type="text" class="cardio-input" id="optional-cardio-input" 
-                placeholder="e.g., 20 min bike, walked to gym" 
-                value="${state.optionalCardio}"
-                onchange="state.optionalCardio = this.value">
+            <div class="additional-exercise-section">
+              <div class="additional-exercise-title"><span style="display:inline-flex;width:20px;height:20px;color:#22c55e;margin-right:4px;">${SVG_ICONS.cardio}</span> Additional Exercise</div>
+              <div class="activity-buttons">
+                <button class="activity-toggle ${state.additionalExercise.type === 'run' ? 'active-green' : ''}" onclick="setAdditionalType('run', 'Run')">🏃 Run</button>
+                <button class="activity-toggle ${state.additionalExercise.type === 'bike' ? 'active-green' : ''}" onclick="setAdditionalType('bike', 'Bike')">🚴 Bike</button>
+                <button class="activity-toggle ${state.additionalExercise.type === 'class' ? 'active-green' : ''}" onclick="setAdditionalType('class', 'Class')">🧘 Class</button>
+                <button class="activity-toggle ${state.additionalExercise.type === 'other' ? 'active-green' : ''}" onclick="setAdditionalType('other', '')">✏️ Other</button>
+              </div>
+              ${state.additionalExercise.type === 'other' ? `<input type="text" class="cardio-input" id="additional-custom-name" placeholder="Activity name" value="${state.additionalExercise.customName}" onchange="state.additionalExercise.customName = this.value" style="margin-bottom:8px">` : ''}
+              <input type="text" class="cardio-input" id="additional-duration" placeholder="Duration (e.g., 30 min)" value="${state.additionalExercise.duration}" onchange="state.additionalExercise.duration = this.value" style="margin-bottom:8px">
+              <input type="text" class="cardio-input" id="additional-notes" placeholder="Notes (optional)" value="${state.additionalExercise.notes}" onchange="state.additionalExercise.notes = this.value">
             </div>
           </div>
         ` : ''}
@@ -678,9 +702,20 @@
       else if (state.currentModal) renderExerciseModal(state.currentModal);
     }
 
-    function addExtraCardio() { state.extraCardios.push({ name: '', duration: '' }); render(); }
+    function setAdditionalType(type, name) {
+      state.additionalExercise.type = type;
+      state.additionalExercise.customName = name;
+      render();
+    }
+
+    function addExtraCardio() { state.extraCardios.push({ type: '', name: '', duration: '', notes: '' }); render(); }
     function removeExtraCardio(index) { state.extraCardios.splice(index, 1); render(); }
     function updateExtraCardio(index, field, value) { state.extraCardios[index][field] = value; }
+    function setExtraCardioType(index, type, name) {
+      state.extraCardios[index].type = type;
+      if (type !== 'other') state.extraCardios[index].name = name;
+      render();
+    }
 
     function getLastLog(id, ex) {
       const logs = state.exerciseLogs[id];
@@ -815,27 +850,22 @@
     }
 
     function saveSettings() { state.googleUrl = document.getElementById('google-url').value; save(); showToast('Settings saved!'); closeModal(); }
-    function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.optionalCardio = ''; state.extraCardios = []; save(); render(); }
+    function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; state.extraCardios = []; save(); render(); }
 
-    // Form-based sync that works on Safari
     function syncToGoogle(payload) {
       return new Promise((resolve) => {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = state.googleUrl;
         form.target = 'sync-iframe';
-        
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'data';
         input.value = JSON.stringify(payload);
         form.appendChild(input);
-        
         document.body.appendChild(form);
         form.submit();
         document.body.removeChild(form);
-        
-        // Give it a moment to send
         setTimeout(resolve, 500);
       });
     }
@@ -844,20 +874,53 @@
       state.syncing = true; render();
       const workout = WORKOUTS[state.workoutIndex];
       const timestamp = new Date().toISOString();
-      const optionalCardioInput = document.getElementById('optional-cardio-input');
-      if (optionalCardioInput) state.optionalCardio = optionalCardioInput.value;
+
+      // Get additional exercise data from inputs
+      const durationInput = document.getElementById('additional-duration');
+      const notesInput = document.getElementById('additional-notes');
+      const customNameInput = document.getElementById('additional-custom-name');
+      if (durationInput) state.additionalExercise.duration = durationInput.value;
+      if (notesInput) state.additionalExercise.notes = notesInput.value;
+      if (customNameInput) state.additionalExercise.customName = customNameInput.value;
+
       Object.entries(state.sessionLogs).forEach(([id, data]) => { if (!state.exerciseLogs[id]) state.exerciseLogs[id] = []; state.exerciseLogs[id].push({ date: timestamp, ...data }); });
-      if (state.googleUrl && (Object.keys(state.sessionLogs).length || state.optionalCardio || state.extraCardios.length)) {
+      
+      if (state.googleUrl && (Object.keys(state.sessionLogs).length || state.additionalExercise.type || state.extraCardios.length)) {
         const exercises = [];
         workout.sections.forEach(section => { section.exercises.forEach(ex => { if (state.sessionLogs[ex.id]) { const logData = state.sessionLogs[ex.id]; let exerciseName = ex.name; if (ex.type === 'bench-choice' && logData.benchType) exerciseName = logData.benchType === 'bb' ? 'Barbell Bench' : 'Dumbbell Bench'; exercises.push({ section: section.name, name: exerciseName, type: ex.type, ...logData }); } }); });
-        if (state.optionalCardio) exercises.push({ section: 'Optional Cardio', name: 'Cardio', type: 'cardio', duration: state.optionalCardio });
-        state.extraCardios.forEach(cardio => { if (cardio.name || cardio.duration) exercises.push({ section: 'Additional Cardio', name: cardio.name || 'Extra Cardio', type: 'cardio', duration: cardio.duration }); });
+
+        // Add additional exercise for strength days
+        if (state.additionalExercise.type && state.additionalExercise.duration) {
+          const activityName = state.additionalExercise.type === 'other' ? state.additionalExercise.customName : (state.additionalExercise.type.charAt(0).toUpperCase() + state.additionalExercise.type.slice(1));
+          exercises.push({
+            section: 'Additional Exercise',
+            name: activityName,
+            type: 'cardio',
+            duration: state.additionalExercise.duration,
+            userNotes: state.additionalExercise.notes
+          });
+        }
+
+        // Add extra cardios for cardio days
+        state.extraCardios.forEach(cardio => {
+          if (cardio.type && cardio.duration) {
+            const activityName = cardio.type === 'other' ? cardio.name : (cardio.type.charAt(0).toUpperCase() + cardio.type.slice(1));
+            exercises.push({
+              section: 'Additional Exercise',
+              name: activityName,
+              type: 'cardio',
+              duration: cardio.duration,
+              userNotes: cardio.notes || ''
+            });
+          }
+        });
+
         try {
           await syncToGoogle({ workoutName: workout.name, exercises });
           showToast('Synced to Google Sheets! 💪');
         } catch (e) { showToast('Saved locally (sync failed)'); }
       } else { showToast('Workout complete! 💪'); }
-      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.optionalCardio = ''; state.extraCardios = []; state.syncing = false; save(); render();
+      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; state.extraCardios = []; state.syncing = false; save(); render();
     }
 
     function showToast(msg) { state.toast = msg; render(); setTimeout(() => { state.toast = null; render(); }, 3000); }
