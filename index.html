@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -407,9 +406,7 @@
       padding: 14px;
       margin-bottom: 10px;
     }
-    .extra-cardio-card.logged {
-      border-color: #22c55e;
-    }
+    .extra-cardio-card.logged { border-color: #22c55e; }
     .extra-cardio-header {
       display: flex;
       justify-content: space-between;
@@ -435,115 +432,41 @@
   <div id="app"></div>
 
   <script>
-    // ==================== EXERCISE SVG ICONS ====================
     const SVG_ICONS = {
-      // Deadlift - person bending to lift bar
       deadlift: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="8" r="4"/><path d="M20 12v6l-6 8M20 18l6 8M14 36h12M8 32h24"/><circle cx="6" cy="32" r="3" fill="currentColor"/><circle cx="34" cy="32" r="3" fill="currentColor"/></svg>`,
-      
-      // Squat - person in squat position
       squat: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="6" r="4"/><path d="M20 10v4M14 14h12M14 14l-2 10 4 2M26 14l2 10-4 2M12 26l-2 10M28 26l2 10"/></svg>`,
-      
-      // Hip thrust - person on bench thrusting
       hipthrust: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="20" width="12" height="8" rx="1"/><circle cx="28" cy="12" r="4"/><path d="M14 24h10c2 0 4-2 4-4v-4M24 16l8 8M24 16l-6 12"/></svg>`,
-      
-      // Step up - person stepping onto platform
       stepup: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="26" width="16" height="10" rx="1"/><circle cx="28" cy="8" r="4"/><path d="M28 12v6M24 18l-8 8M32 18v12M24 30v6"/></svg>`,
-      
-      // Leg extension - seated leg raise
       legext: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="14" width="14" height="12" rx="1"/><circle cx="24" cy="10" r="4"/><path d="M18 20h6l2-4M24 16v4l10 4"/><circle cx="36" cy="24" r="2" fill="currentColor"/></svg>`,
-      
-      // Leg curl - lying face down curling
       legcurl: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="18" width="24" height="6" rx="1"/><circle cx="8" cy="16" r="4"/><path d="M26 21l6-8"/><circle cx="34" cy="11" r="2" fill="currentColor"/></svg>`,
-      
-      // Calf raise - standing on toes
       calfraise: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="6" r="4"/><path d="M20 10v12M16 22l-2 6 2 4M24 22l2 6-2 4"/><rect x="10" y="34" width="20" height="4" rx="1"/><ellipse cx="20" cy="18" rx="6" ry="3" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // Farmer carry - holding weights at sides
       farmerscarry: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="6" r="4"/><path d="M20 10v10M16 20v-6M24 20v-6M16 26v8M24 26v8"/><rect x="6" y="18" width="6" height="10" rx="1" fill="currentColor" opacity="0.3"/><rect x="28" y="18" width="6" height="10" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // Dead hang - hanging from bar
       deadhang: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="32" height="4" rx="1"/><circle cx="20" cy="14" r="4"/><path d="M16 8v4M24 8v4M20 18v10M16 28v8M24 28v8"/></svg>`,
-      
-      // Cardio/bike
       cardio: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="28" r="6"/><circle cx="30" cy="28" r="6"/><path d="M10 28l8-12h8l4 12M18 16l-4 12M22 10l4-4"/><circle cx="26" cy="6" r="3"/></svg>`,
-      
-      // Chin up / Pull up
       pullup: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="32" height="4" rx="1"/><circle cx="20" cy="12" r="4"/><path d="M14 6l2 4M26 6l-2 4M20 16v8M16 24l-4 10M24 24l4 10"/></svg>`,
-      
-      // Barbell row - bent over rowing
       row: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="14" cy="8" r="4"/><path d="M14 12l4 8 8 4M14 12l-4 14M22 24l6 10"/><line x1="6" y1="28" x2="34" y2="28"/><circle cx="6" cy="28" r="3" fill="currentColor"/><circle cx="34" cy="28" r="3" fill="currentColor"/></svg>`,
-      
-      // Overhead press
       ohp: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="14" r="4"/><path d="M20 18v10M16 28v8M24 28v8M12 8h16"/><circle cx="10" cy="8" r="3" fill="currentColor"/><circle cx="30" cy="8" r="3" fill="currentColor"/><path d="M16 18l-4-10M24 18l4-10"/></svg>`,
-      
-      // Bench press - lying on bench pressing
       bench: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="22" width="28" height="4" rx="1"/><circle cx="12" cy="20" r="3"/><path d="M15 22h10M14 14h12"/><circle cx="12" cy="14" r="2" fill="currentColor"/><circle cx="28" cy="14" r="2" fill="currentColor"/><path d="M12 26v8M28 26v8"/></svg>`,
-      
-      // Bicep curl
       curl: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="8" r="4"/><path d="M20 12v8M24 20v8M16 20v14"/><path d="M24 28l4-8" stroke-width="3"/><rect x="26" y="16" width="4" height="6" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // Tricep extension - overhead
       tricep: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="14" r="4"/><path d="M20 18v10M16 28v8M24 28v8"/><path d="M16 10l4-6 4 6"/><rect x="18" y="2" width="4" height="6" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // Y-Raise - arms in Y position
       yraise: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="14" r="4"/><path d="M20 18v10M16 28v8M24 28v8M16 18l-8-10M24 18l8-10"/><circle cx="6" cy="6" r="2" fill="currentColor"/><circle cx="34" cy="6" r="2" fill="currentColor"/></svg>`,
-      
-      // Face pulls - pulling to face
       facepull: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="28" cy="12" r="4"/><path d="M28 16v8M24 24v10M32 24v10"/><path d="M24 12H8M24 16H12"/><rect x="2" y="8" width="6" height="12" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // Lunges - stepping forward
       lunge: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="24" cy="6" r="4"/><path d="M24 10v8M20 18l-8 10v6M28 18l6 6v10"/></svg>`,
-      
-      // Shrugs - shoulders up
       shrug: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="10" r="4"/><path d="M20 14v12M16 26v10M24 26v10"/><path d="M12 12c0-4 4-4 8-4s8 0 8 4"/><rect x="6" y="14" width="4" height="10" rx="1" fill="currentColor" opacity="0.3"/><rect x="30" y="14" width="4" height="10" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // VO2 Max / HIIT - lightning bolt
       hiit: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 4L10 22h10l-4 14 16-20H20l4-12z" fill="currentColor" opacity="0.3"/></svg>`,
-      
-      // Rear delt fly
       reardelt: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="10" r="4"/><path d="M20 14v6l-4 8v8M20 20l4 8v8"/><path d="M12 16l-8 4M28 16l8 4"/><circle cx="4" cy="22" r="2" fill="currentColor"/><circle cx="36" cy="22" r="2" fill="currentColor"/></svg>`
     };
     
-    // Map exercise IDs to SVG icon keys
     const EXERCISE_ICON_MAP = {
-      "trap-deadlift": "deadlift",
-      "goblet-squat": "squat",
-      "hip-thrust": "hipthrust",
-      "step-ups": "stepup",
-      "leg-ext": "legext",
-      "leg-curl": "legcurl",
-      "calf-raise": "calfraise",
-      "farmers": "farmerscarry",
-      "dead-hang": "deadhang",
-      "zone2-a": "cardio",
-      "zone2-b": "cardio",
-      "chin-ups": "pullup",
-      "bb-row": "row",
-      "ohp": "ohp",
-      "db-bench": "bench",
-      "incline-curl": "curl",
-      "oh-tri-ext": "tricep",
-      "y-raise": "yraise",
-      "face-pulls": "facepull",
-      "back-squat": "squat",
-      "rdl": "deadlift",
-      "lunges": "lunge",
-      "leg-ext-b": "legext",
-      "seated-curl": "legcurl",
-      "calf-b": "calfraise",
-      "seated-calf": "calfraise",
-      "farmers-b": "farmerscarry",
-      "zone2-sat": "cardio",
-      "vo2max-int": "hiit",
-      "zone2-sun": "cardio",
-      "pull-ups": "pullup",
-      "cable-row": "row",
-      "db-bench-b": "bench",
-      "conc-curl": "curl",
-      "tri-push": "tricep",
-      "rear-delt": "reardelt",
-      "shrugs": "shrug",
-      "hang-sun": "deadhang"
+      "trap-deadlift": "deadlift", "goblet-squat": "squat", "hip-thrust": "hipthrust", "step-ups": "stepup",
+      "leg-ext": "legext", "leg-curl": "legcurl", "calf-raise": "calfraise", "farmers": "farmerscarry",
+      "dead-hang": "deadhang", "zone2-a": "cardio", "zone2-b": "cardio", "chin-ups": "pullup",
+      "bb-row": "row", "ohp": "ohp", "db-bench": "bench", "incline-curl": "curl", "oh-tri-ext": "tricep",
+      "y-raise": "yraise", "face-pulls": "facepull", "back-squat": "squat", "rdl": "deadlift",
+      "lunges": "lunge", "leg-ext-b": "legext", "seated-curl": "legcurl", "calf-b": "calfraise",
+      "seated-calf": "calfraise", "farmers-b": "farmerscarry", "zone2-sat": "cardio", "vo2max-int": "hiit",
+      "zone2-sun": "cardio", "pull-ups": "pullup", "cable-row": "row", "db-bench-b": "bench",
+      "conc-curl": "curl", "tri-push": "tricep", "rear-delt": "reardelt", "shrugs": "shrug", "hang-sun": "deadhang"
     };
     
     function getExerciseIcon(id) {
@@ -551,11 +474,8 @@
       return SVG_ICONS[iconKey] || SVG_ICONS.deadlift;
     }
 
-    // ==================== DATA ====================
     const WORKOUTS = [
-      {
-        id: "lower-a", name: "Lower Body A: Deadlift Focus", category: "Strength",
-        sections: [
+      { id: "lower-a", name: "Lower Body A: Deadlift Focus", category: "Strength", sections: [
           { name: "Compounds", exercises: [
             { id: "trap-deadlift", name: "Trap Bar Deadlift", sets: 4, reps: "6-8", type: "weighted" },
             { id: "goblet-squat", name: "Goblet Squat", sets: 3, reps: "10-12", type: "weighted" },
@@ -571,21 +491,13 @@
             { id: "farmers", name: "Farmer's Carry", sets: 2, reps: "1 min", notes: "50% BW each hand", type: "weighted" },
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ],
-        hasOptionalCardio: true
-      },
-      {
-        id: "zone2-1", name: "Zone 2 Cardio", category: "Cardio",
-        sections: [
+        ], hasOptionalCardio: true },
+      { id: "zone2-1", name: "Zone 2 Cardio", category: "Cardio", sections: [
           { name: "Cardio", exercises: [
             { id: "zone2-a", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140. Bike, treadmill 15%, row, or ruck.", type: "cardio" }
           ]}
-        ],
-        allowExtraCardio: true
-      },
-      {
-        id: "upper-a", name: "Upper Body A: Pull Focus", category: "Strength",
-        sections: [
+        ], allowExtraCardio: true },
+      { id: "upper-a", name: "Upper Body A: Pull Focus", category: "Strength", sections: [
           { name: "Compounds", exercises: [
             { id: "chin-ups", name: "Chin-Ups", sets: 4, reps: "6-10", notes: "Supinated grip", type: "bodyweight" },
             { id: "bb-row", name: "Barbell Row", sets: 4, reps: "8-10", notes: "Elbows tucked", type: "weighted" },
@@ -601,21 +513,13 @@
           { name: "Grip", exercises: [
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ],
-        hasOptionalCardio: true
-      },
-      {
-        id: "zone2-2", name: "Zone 2 Cardio", category: "Cardio",
-        sections: [
+        ], hasOptionalCardio: true },
+      { id: "zone2-2", name: "Zone 2 Cardio", category: "Cardio", sections: [
           { name: "Cardio", exercises: [
             { id: "zone2-b", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140. Steady state.", type: "cardio" }
           ]}
-        ],
-        allowExtraCardio: true
-      },
-      {
-        id: "lower-b", name: "Lower Body B: Squat Focus", category: "Strength",
-        sections: [
+        ], allowExtraCardio: true },
+      { id: "lower-b", name: "Lower Body B: Squat Focus", category: "Strength", sections: [
           { name: "Compounds", exercises: [
             { id: "back-squat", name: "Back Squat", sets: 4, reps: "8-10", notes: "Full depth", type: "weighted" },
             { id: "rdl", name: "Romanian Deadlift", sets: 3, reps: "8-10", type: "weighted" },
@@ -631,24 +535,16 @@
             { id: "farmers-b", name: "Farmer's Carry", sets: 2, reps: "1 min", type: "weighted" },
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ],
-        hasOptionalCardio: true
-      },
-      {
-        id: "vo2max", name: "Zone 2 + VO2 Max", category: "Cardio",
-        sections: [
+        ], hasOptionalCardio: true },
+      { id: "vo2max", name: "Zone 2 + VO2 Max", category: "Cardio", sections: [
           { name: "Zone 2", exercises: [
             { id: "zone2-sat", name: "Zone 2 Cardio", sets: 1, reps: "45 min", type: "cardio" }
           ]},
           { name: "VO2 Max", exercises: [
             { id: "vo2max-int", name: "4x4 Intervals", sets: 4, reps: "4 min on/off", notes: "4-6 rounds total", type: "cardio" }
           ]}
-        ],
-        allowExtraCardio: true
-      },
-      {
-        id: "upper-b", name: "Zone 2 + Upper Body B", category: "Cardio + Strength",
-        sections: [
+        ], allowExtraCardio: true },
+      { id: "upper-b", name: "Zone 2 + Upper Body B", category: "Cardio + Strength", sections: [
           { name: "Zone 2", exercises: [
             { id: "zone2-sun", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", type: "cardio" }
           ]},
@@ -666,12 +562,9 @@
           { name: "Grip", exercises: [
             { id: "hang-sun", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
-        ],
-        hasOptionalCardio: true
-      }
+        ], hasOptionalCardio: true }
     ];
 
-    // ==================== STATE ====================
     let state = {
       workoutIndex: parseInt(localStorage.getItem('workoutIndex') || '0'),
       exerciseLogs: JSON.parse(localStorage.getItem('exerciseLogs') || '{}'),
@@ -681,7 +574,7 @@
       syncing: false,
       toast: null,
       optionalCardio: '',
-      extraCardios: [] // For cardio days: [{name: '', duration: ''}]
+      extraCardios: []
     };
 
     function save() {
@@ -690,7 +583,6 @@
       localStorage.setItem('googleUrl', state.googleUrl);
     }
 
-    // ==================== RENDER ====================
     function render() {
       const workout = WORKOUTS[state.workoutIndex];
       const catClass = workout.category === 'Cardio' ? 'cardio' : workout.category.includes('+') ? 'mixed' : '';
@@ -780,24 +672,13 @@
       `;
 
       document.getElementById('app').innerHTML = html;
-
       if (state.currentModal === 'settings') renderSettingsModal();
       else if (state.currentModal) renderExerciseModal(state.currentModal);
     }
 
-    function addExtraCardio() {
-      state.extraCardios.push({ name: '', duration: '' });
-      render();
-    }
-
-    function removeExtraCardio(index) {
-      state.extraCardios.splice(index, 1);
-      render();
-    }
-
-    function updateExtraCardio(index, field, value) {
-      state.extraCardios[index][field] = value;
-    }
+    function addExtraCardio() { state.extraCardios.push({ name: '', duration: '' }); render(); }
+    function removeExtraCardio(index) { state.extraCardios.splice(index, 1); render(); }
+    function updateExtraCardio(index, field, value) { state.extraCardios[index][field] = value; }
 
     function getLastLog(id, ex) {
       const logs = state.exerciseLogs[id];
@@ -805,196 +686,72 @@
       const last = logs[logs.length - 1];
       if (ex.type === 'cardio') return last.duration || 'Completed';
       if (ex.type === 'seconds') {
-        if (last.sets && last.sets.length) {
-          return last.sets.map(s => s.seconds ? `${s.seconds}s` : '').filter(Boolean).join(', ') || 'Completed';
-        }
+        if (last.sets && last.sets.length) return last.sets.map(s => s.seconds ? `${s.seconds}s` : '').filter(Boolean).join(', ') || 'Completed';
         return 'Completed';
       }
       if (ex.type === 'bench-choice') {
         const prefix = last.benchType === 'bb' ? 'BB: ' : 'DB: ';
-        if (last.sets && last.sets.length) {
-          return prefix + last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : s.reps ? `${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
-        }
+        if (last.sets && last.sets.length) return prefix + last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : s.reps ? `${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
         return 'Completed';
       }
-      if (last.sets && last.sets.length) {
-        return last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : s.reps ? `${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
-      }
+      if (last.sets && last.sets.length) return last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : s.reps ? `${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
       return 'Completed';
     }
 
     function getExercise(id) {
-      for (const w of WORKOUTS) {
-        for (const s of w.sections) {
-          for (const e of s.exercises) {
-            if (e.id === id) return { ...e, section: s.name };
-          }
-        }
-      }
+      for (const w of WORKOUTS) for (const s of w.sections) for (const e of s.exercises) if (e.id === id) return { ...e, section: s.name };
       return null;
     }
 
-    // ==================== MODALS ====================
-    function openExercise(id) {
-      state.currentModal = id;
-      render();
-    }
-
-    function closeModal() {
-      state.currentModal = null;
-      render();
-    }
-
-    function showSettings() {
-      state.currentModal = 'settings';
-      render();
-    }
+    function openExercise(id) { state.currentModal = id; render(); }
+    function closeModal() { state.currentModal = null; render(); }
+    function showSettings() { state.currentModal = 'settings'; render(); }
 
     function renderExerciseModal(id) {
       const ex = getExercise(id);
       if (!ex) return;
-      
       const isCardio = ex.type === 'cardio';
       const isSeconds = ex.type === 'seconds';
       const isBenchChoice = ex.type === 'bench-choice';
       const current = state.sessionLogs[id];
       const lastLog = state.exerciseLogs[id]?.[state.exerciseLogs[id].length - 1];
       const icon = getExerciseIcon(ex.id);
-      
       const currentNotes = current?.userNotes || '';
       const currentBenchType = current?.benchType || lastLog?.benchType || 'db';
       
       let setsHtml = '';
       if (isCardio) {
         const val = current?.duration || lastLog?.duration || '';
-        setsHtml = `
-          <div style="margin-bottom:16px">
-            <label class="input-label">Duration / Notes</label>
-            <input type="text" class="duration-input" id="duration-input" value="${val}" placeholder="e.g., 45 min, 120 bpm avg">
-          </div>
-        `;
+        setsHtml = `<div style="margin-bottom:16px"><label class="input-label">Duration / Notes</label><input type="text" class="duration-input" id="duration-input" value="${val}" placeholder="e.g., 45 min, 120 bpm avg"></div>`;
       } else if (isSeconds) {
         const numSets = ex.sets;
         let sets = current?.sets || [];
-        if (!sets.length) {
-          for (let i = 0; i < numSets; i++) {
-            sets.push({ seconds: lastLog?.sets?.[i]?.seconds || '' });
-          }
-        }
-        setsHtml = `
-          <div style="margin-bottom:8px">
-            <label class="input-label">Target: ${ex.sets} × ${ex.reps}</label>
-          </div>
-          <div id="sets-container">
-            ${sets.map((s, i) => `
-              <div class="set-row">
-                <span class="set-label">Set ${i + 1}</span>
-                <input type="number" class="set-input" data-set="${i}" data-field="seconds" value="${s.seconds}" placeholder="sec" style="flex:1;width:auto;">
-                <span class="set-unit">sec</span>
-              </div>
-            `).join('')}
-          </div>
-          <button class="add-set-btn" onclick="addSetSeconds()">+ Add Set</button>
-        `;
+        if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ seconds: lastLog?.sets?.[i]?.seconds || '' });
+        setsHtml = `<div style="margin-bottom:8px"><label class="input-label">Target: ${ex.sets} × ${ex.reps}</label></div><div id="sets-container">${sets.map((s, i) => `<div class="set-row"><span class="set-label">Set ${i + 1}</span><input type="number" class="set-input" data-set="${i}" data-field="seconds" value="${s.seconds}" placeholder="sec" style="flex:1;width:auto;"><span class="set-unit">sec</span></div>`).join('')}</div><button class="add-set-btn" onclick="addSetSeconds()">+ Add Set</button>`;
       } else if (isBenchChoice) {
         const numSets = ex.sets;
         let sets = current?.sets || [];
-        if (!sets.length) {
-          for (let i = 0; i < numSets; i++) {
-            sets.push({ weight: lastLog?.sets?.[i]?.weight || '', reps: lastLog?.sets?.[i]?.reps || '' });
-          }
-        }
-        setsHtml = `
-          <div style="margin-bottom:16px">
-            <label class="input-label">Equipment</label>
-            <div style="display:flex;gap:8px;">
-              <button type="button" id="btn-db" class="bench-toggle ${currentBenchType === 'db' ? 'active' : ''}" onclick="selectBenchType('db')">🏋️ Dumbbell</button>
-              <button type="button" id="btn-bb" class="bench-toggle ${currentBenchType === 'bb' ? 'active' : ''}" onclick="selectBenchType('bb')">🏋️ Barbell</button>
-            </div>
-            <input type="hidden" id="bench-type-input" value="${currentBenchType}">
-          </div>
-          <div style="margin-bottom:8px">
-            <label class="input-label">Target: ${ex.sets} × ${ex.reps}</label>
-            <div id="weight-hint" style="color:#666;font-size:12px;margin-top:4px;">
-              ${currentBenchType === 'db' ? 'Enter weight per dumbbell' : 'Enter total barbell weight'}
-            </div>
-          </div>
-          <div id="sets-container">
-            ${sets.map((s, i) => `
-              <div class="set-row">
-                <span class="set-label">Set ${i + 1}</span>
-                <input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs">
-                <span class="set-x">×</span>
-                <input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps">
-              </div>
-            `).join('')}
-          </div>
-          <button class="add-set-btn" onclick="addSet()">+ Add Set</button>
-        `;
+        if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ weight: lastLog?.sets?.[i]?.weight || '', reps: lastLog?.sets?.[i]?.reps || '' });
+        setsHtml = `<div style="margin-bottom:16px"><label class="input-label">Equipment</label><div style="display:flex;gap:8px;"><button type="button" id="btn-db" class="bench-toggle ${currentBenchType === 'db' ? 'active' : ''}" onclick="selectBenchType('db')">🏋️ Dumbbell</button><button type="button" id="btn-bb" class="bench-toggle ${currentBenchType === 'bb' ? 'active' : ''}" onclick="selectBenchType('bb')">🏋️ Barbell</button></div><input type="hidden" id="bench-type-input" value="${currentBenchType}"></div><div style="margin-bottom:8px"><label class="input-label">Target: ${ex.sets} × ${ex.reps}</label><div id="weight-hint" style="color:#666;font-size:12px;margin-top:4px;">${currentBenchType === 'db' ? 'Enter weight per dumbbell' : 'Enter total barbell weight'}</div></div><div id="sets-container">${sets.map((s, i) => `<div class="set-row"><span class="set-label">Set ${i + 1}</span><input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs"><span class="set-x">×</span><input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps"></div>`).join('')}</div><button class="add-set-btn" onclick="addSet()">+ Add Set</button>`;
       } else {
         const numSets = ex.sets;
         let sets = current?.sets || [];
-        if (!sets.length) {
-          for (let i = 0; i < numSets; i++) {
-            sets.push({ weight: lastLog?.sets?.[i]?.weight || '', reps: lastLog?.sets?.[i]?.reps || '' });
-          }
-        }
-        setsHtml = `
-          <div style="margin-bottom:8px">
-            <label class="input-label">Target: ${ex.sets} × ${ex.reps}</label>
-          </div>
-          <div id="sets-container">
-            ${sets.map((s, i) => `
-              <div class="set-row">
-                <span class="set-label">Set ${i + 1}</span>
-                <input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs">
-                <span class="set-x">×</span>
-                <input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps">
-              </div>
-            `).join('')}
-          </div>
-          <button class="add-set-btn" onclick="addSet()">+ Add Set</button>
-        `;
+        if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ weight: lastLog?.sets?.[i]?.weight || '', reps: lastLog?.sets?.[i]?.reps || '' });
+        setsHtml = `<div style="margin-bottom:8px"><label class="input-label">Target: ${ex.sets} × ${ex.reps}</label></div><div id="sets-container">${sets.map((s, i) => `<div class="set-row"><span class="set-label">Set ${i + 1}</span><input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs"><span class="set-x">×</span><input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps"></div>`).join('')}</div><button class="add-set-btn" onclick="addSet()">+ Add Set</button>`;
       }
 
       let lastDisplay = 'No previous data';
       if (lastLog) {
-        if (isCardio) {
-          lastDisplay = lastLog.duration || 'Completed';
-        } else if (isSeconds) {
-          lastDisplay = lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.seconds || '-'} sec`).join('<br>') || 'Completed';
-        } else if (isBenchChoice) {
-          const benchLabel = lastLog.benchType === 'bb' ? 'Barbell' : 'Dumbbell';
-          lastDisplay = `<strong>${benchLabel}</strong><br>` + (lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.weight || '-'} lbs × ${s.reps || '-'}`).join('<br>') || 'Completed');
-        } else {
-          lastDisplay = lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.weight || '-'} lbs × ${s.reps || '-'}`).join('<br>') || 'Completed';
-        }
+        if (isCardio) lastDisplay = lastLog.duration || 'Completed';
+        else if (isSeconds) lastDisplay = lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.seconds || '-'} sec`).join('<br>') || 'Completed';
+        else if (isBenchChoice) lastDisplay = `<strong>${lastLog.benchType === 'bb' ? 'Barbell' : 'Dumbbell'}</strong><br>` + (lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.weight || '-'} lbs × ${s.reps || '-'}`).join('<br>') || 'Completed');
+        else lastDisplay = lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.weight || '-'} lbs × ${s.reps || '-'}`).join('<br>') || 'Completed';
       }
 
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-      modal.innerHTML = `
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <h2 class="modal-title">${ex.name}</h2>
-            <button class="modal-close" onclick="closeModal()">×</button>
-          </div>
-          <div class="modal-body">
-            <div class="modal-exercise-icon">${icon}</div>
-            ${lastLog ? `<div class="last-performance"><div class="last-performance-title">Last Performance</div><div class="last-performance-value">${lastDisplay}</div></div>` : ''}
-            ${ex.notes ? `<div class="modal-notes"><div class="modal-notes-title">Tips</div><div class="modal-notes-text">${ex.notes}</div></div>` : ''}
-            ${setsHtml}
-            <div class="notes-section">
-              <label class="input-label">Your Notes (optional)</label>
-              <textarea class="notes-input" id="user-notes-input" placeholder="How did it feel? Any adjustments?">${currentNotes}</textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="save-btn" onclick="saveExercise('${id}', '${ex.type}')">Save</button>
-          </div>
-        </div>
-      `;
+      modal.innerHTML = `<div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h2 class="modal-title">${ex.name}</h2><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><div class="modal-exercise-icon">${icon}</div>${lastLog ? `<div class="last-performance"><div class="last-performance-title">Last Performance</div><div class="last-performance-value">${lastDisplay}</div></div>` : ''}${ex.notes ? `<div class="modal-notes"><div class="modal-notes-title">Tips</div><div class="modal-notes-text">${ex.notes}</div></div>` : ''}${setsHtml}<div class="notes-section"><label class="input-label">Your Notes (optional)</label><textarea class="notes-input" id="user-notes-input" placeholder="How did it feel? Any adjustments?">${currentNotes}</textarea></div></div><div class="modal-footer"><button class="save-btn" onclick="saveExercise('${id}', '${ex.type}')">Save</button></div></div>`;
       document.getElementById('app').appendChild(modal);
     }
 
@@ -1010,12 +767,7 @@
       const count = container.querySelectorAll('.set-row').length;
       const div = document.createElement('div');
       div.className = 'set-row';
-      div.innerHTML = `
-        <span class="set-label">Set ${count + 1}</span>
-        <input type="number" class="set-input" data-set="${count}" data-field="weight" placeholder="lbs">
-        <span class="set-x">×</span>
-        <input type="number" class="set-input" data-set="${count}" data-field="reps" placeholder="reps">
-      `;
+      div.innerHTML = `<span class="set-label">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="weight" placeholder="lbs"><span class="set-x">×</span><input type="number" class="set-input" data-set="${count}" data-field="reps" placeholder="reps">`;
       container.appendChild(div);
     }
 
@@ -1024,49 +776,29 @@
       const count = container.querySelectorAll('.set-row').length;
       const div = document.createElement('div');
       div.className = 'set-row';
-      div.innerHTML = `
-        <span class="set-label">Set ${count + 1}</span>
-        <input type="number" class="set-input" data-set="${count}" data-field="seconds" placeholder="sec" style="flex:1;width:auto;">
-        <span class="set-unit">sec</span>
-      `;
+      div.innerHTML = `<span class="set-label">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="seconds" placeholder="sec" style="flex:1;width:auto;"><span class="set-unit">sec</span>`;
       container.appendChild(div);
     }
 
     function saveExercise(id, type) {
       const userNotes = document.getElementById('user-notes-input').value.trim();
-      
       if (type === 'cardio') {
-        const duration = document.getElementById('duration-input').value;
-        state.sessionLogs[id] = { duration, userNotes };
+        state.sessionLogs[id] = { duration: document.getElementById('duration-input').value, userNotes };
       } else if (type === 'seconds') {
         const inputs = document.querySelectorAll('#sets-container .set-input');
         const sets = [];
-        inputs.forEach(input => {
-          const setIdx = parseInt(input.dataset.set);
-          if (!sets[setIdx]) sets[setIdx] = {};
-          sets[setIdx].seconds = input.value;
-        });
+        inputs.forEach(input => { const setIdx = parseInt(input.dataset.set); if (!sets[setIdx]) sets[setIdx] = {}; sets[setIdx].seconds = input.value; });
         state.sessionLogs[id] = { sets: sets.filter(s => s.seconds), userNotes };
       } else if (type === 'bench-choice') {
         const benchType = document.getElementById('bench-type-input').value;
         const inputs = document.querySelectorAll('#sets-container .set-input');
         const sets = [];
-        inputs.forEach(input => {
-          const setIdx = parseInt(input.dataset.set);
-          const field = input.dataset.field;
-          if (!sets[setIdx]) sets[setIdx] = {};
-          sets[setIdx][field] = input.value;
-        });
+        inputs.forEach(input => { const setIdx = parseInt(input.dataset.set); const field = input.dataset.field; if (!sets[setIdx]) sets[setIdx] = {}; sets[setIdx][field] = input.value; });
         state.sessionLogs[id] = { sets: sets.filter(s => s.weight || s.reps), userNotes, benchType };
       } else {
         const inputs = document.querySelectorAll('#sets-container .set-input');
         const sets = [];
-        inputs.forEach(input => {
-          const setIdx = parseInt(input.dataset.set);
-          const field = input.dataset.field;
-          if (!sets[setIdx]) sets[setIdx] = {};
-          sets[setIdx][field] = input.value;
-        });
+        inputs.forEach(input => { const setIdx = parseInt(input.dataset.set); const field = input.dataset.field; if (!sets[setIdx]) sets[setIdx] = {}; sets[setIdx][field] = input.value; });
         state.sessionLogs[id] = { sets: sets.filter(s => s.weight || s.reps), userNotes };
       }
       closeModal();
@@ -1076,136 +808,41 @@
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-      modal.innerHTML = `
-        <div class="modal" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <h2 class="modal-title">Settings</h2>
-            <button class="modal-close" onclick="closeModal()">×</button>
-          </div>
-          <div class="modal-body">
-            <h3 style="color:#fff;font-size:16px;margin-bottom:12px">Google Sheets Sync</h3>
-            <p class="settings-description">Paste your Google Apps Script Web App URL to automatically sync workouts.</p>
-            <input type="url" class="settings-input" id="google-url" value="${state.googleUrl}" placeholder="https://script.google.com/macros/s/...">
-          </div>
-          <div class="modal-footer">
-            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
-          </div>
-        </div>
-      `;
+      modal.innerHTML = `<div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h2 class="modal-title">Settings</h2><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><h3 style="color:#fff;font-size:16px;margin-bottom:12px">Google Sheets Sync</h3><p class="settings-description">Paste your Google Apps Script Web App URL to automatically sync workouts.</p><input type="url" class="settings-input" id="google-url" value="${state.googleUrl}" placeholder="https://script.google.com/macros/s/..."></div><div class="modal-footer"><button class="save-btn" onclick="saveSettings()">Save Settings</button></div></div>`;
       document.getElementById('app').appendChild(modal);
     }
 
-    function saveSettings() {
-      state.googleUrl = document.getElementById('google-url').value;
-      save();
-      showToast('Settings saved!');
-      closeModal();
-    }
-
-    // ==================== ACTIONS ====================
-    function skipWorkout() {
-      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length;
-      state.sessionLogs = {};
-      state.optionalCardio = '';
-      state.extraCardios = [];
-      save();
-      render();
-    }
+    function saveSettings() { state.googleUrl = document.getElementById('google-url').value; save(); showToast('Settings saved!'); closeModal(); }
+    function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.optionalCardio = ''; state.extraCardios = []; save(); render(); }
 
     async function completeWorkout() {
-      state.syncing = true;
-      render();
-
+      state.syncing = true; render();
       const workout = WORKOUTS[state.workoutIndex];
       const timestamp = new Date().toISOString();
-
-      // Get optional cardio from input if it exists
       const optionalCardioInput = document.getElementById('optional-cardio-input');
-      if (optionalCardioInput) {
-        state.optionalCardio = optionalCardioInput.value;
-      }
-
-      // Save locally
-      Object.entries(state.sessionLogs).forEach(([id, data]) => {
-        if (!state.exerciseLogs[id]) state.exerciseLogs[id] = [];
-        state.exerciseLogs[id].push({ date: timestamp, ...data });
-      });
-
-      // Sync to Google
+      if (optionalCardioInput) state.optionalCardio = optionalCardioInput.value;
+      Object.entries(state.sessionLogs).forEach(([id, data]) => { if (!state.exerciseLogs[id]) state.exerciseLogs[id] = []; state.exerciseLogs[id].push({ date: timestamp, ...data }); });
       if (state.googleUrl && (Object.keys(state.sessionLogs).length || state.optionalCardio || state.extraCardios.length)) {
         const exercises = [];
-        workout.sections.forEach(section => {
-          section.exercises.forEach(ex => {
-            if (state.sessionLogs[ex.id]) {
-              const logData = state.sessionLogs[ex.id];
-              let exerciseName = ex.name;
-              // Append DB/BB to exercise name for bench-choice
-              if (ex.type === 'bench-choice' && logData.benchType) {
-                exerciseName = logData.benchType === 'bb' ? 'Barbell Bench' : 'Dumbbell Bench';
-              }
-              exercises.push({ 
-                section: section.name, 
-                name: exerciseName,
-                type: ex.type,
-                ...logData 
-              });
-            }
-          });
-        });
-
-        // Add optional cardio for strength days
-        if (state.optionalCardio) {
-          exercises.push({
-            section: 'Optional Cardio',
-            name: 'Cardio',
-            type: 'cardio',
-            duration: state.optionalCardio
-          });
-        }
-
-        // Add extra cardios for cardio days
-        state.extraCardios.forEach(cardio => {
-          if (cardio.name || cardio.duration) {
-            exercises.push({
-              section: 'Additional Cardio',
-              name: cardio.name || 'Extra Cardio',
-              type: 'cardio',
-              duration: cardio.duration
-            });
-          }
-        });
-
+        workout.sections.forEach(section => { section.exercises.forEach(ex => { if (state.sessionLogs[ex.id]) { const logData = state.sessionLogs[ex.id]; let exerciseName = ex.name; if (ex.type === 'bench-choice' && logData.benchType) exerciseName = logData.benchType === 'bb' ? 'Barbell Bench' : 'Dumbbell Bench'; exercises.push({ section: section.name, name: exerciseName, type: ex.type, ...logData }); } }); });
+        if (state.optionalCardio) exercises.push({ section: 'Optional Cardio', name: 'Cardio', type: 'cardio', duration: state.optionalCardio });
+        state.extraCardios.forEach(cardio => { if (cardio.name || cardio.duration) exercises.push({ section: 'Additional Cardio', name: cardio.name || 'Extra Cardio', type: 'cardio', duration: cardio.duration }); });
         try {
-          await fetch(state.googleUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ workoutName: workout.name, exercises })
-          });
+          const payload = JSON.stringify({ workoutName: workout.name, exercises });
+          let sent = false;
+          if (navigator.sendBeacon) {
+            sent = navigator.sendBeacon(state.googleUrl, new Blob([payload], { type: 'application/json' }));
+          }
+          if (!sent) {
+            await fetch(state.googleUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: payload });
+          }
           showToast('Synced to Google Sheets! 💪');
-        } catch (e) {
-          showToast('Saved locally (sync failed)');
-        }
-      } else {
-        showToast('Workout complete! 💪');
-      }
-
-      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length;
-      state.sessionLogs = {};
-      state.optionalCardio = '';
-      state.extraCardios = [];
-      state.syncing = false;
-      save();
-      render();
+        } catch (e) { showToast('Saved locally (sync failed)'); }
+      } else { showToast('Workout complete! 💪'); }
+      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.optionalCardio = ''; state.extraCardios = []; state.syncing = false; save(); render();
     }
 
-    function showToast(msg) {
-      state.toast = msg;
-      render();
-      setTimeout(() => { state.toast = null; render(); }, 3000);
-    }
-
-    // ==================== INIT ====================
+    function showToast(msg) { state.toast = msg; render(); setTimeout(() => { state.toast = null; render(); }, 3000); }
     render();
   </script>
 </body>
