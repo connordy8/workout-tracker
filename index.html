@@ -5,438 +5,698 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Workout">
-  <title>Workout Tracker</title>
+  <meta name="apple-mobile-web-app-title" content="Body Log">
+  <title>Body Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a;
-      color: #fff;
-      min-height: 100vh;
-      padding-bottom: 100px;
+    :root {
+      --bg-primary: #fafafa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f5f5f7;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --text-tertiary: #86868b;
+      --accent: #0071e3;
+      --accent-light: #e8f4fd;
+      --success: #34c759;
+      --success-light: #e8f9ed;
+      --warning: #ff9500;
+      --border: #e5e5e7;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
     }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 120px;
+      -webkit-font-smoothing: antialiased;
+    }
+    
     .header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      padding: 20px;
+      background: var(--bg-secondary);
+      padding: 20px 24px;
       padding-top: max(20px, env(safe-area-inset-top));
       position: sticky;
       top: 0;
       z-index: 100;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--border);
     }
+    
     .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .logo {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .icon-btn:hover { background: var(--border); }
+    
+    .workout-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
       margin-bottom: 8px;
     }
-    .workout-name {
-      font-size: 20px;
-      font-weight: 700;
-      flex: 1;
-      padding-right: 10px;
+    
+    .workout-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .header-buttons { display: flex; gap: 8px; }
-    .skip-btn, .settings-btn {
-      background: transparent;
-      border: 1px solid #666;
-      color: #999;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .category-badge {
-      display: inline-block;
-      background: #4a9eff;
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .category-badge.cardio { background: #22c55e; }
-    .category-badge.mixed { background: #f59e0b; }
-    .sync-status {
+    
+    .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-left: 10px;
-      font-size: 12px;
-      color: #888;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
     }
+    
+    .badge.strength { background: var(--accent-light); color: var(--accent); }
+    .badge.cardio { background: var(--success-light); color: var(--success); }
+    .badge.mixed { background: #fff3e0; color: var(--warning); }
+    
+    .sync-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+    
     .sync-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #666;
+      background: var(--border);
     }
-    .sync-dot.connected { background: #22c55e; }
-    .progress-indicator {
+    
+    .sync-dot.connected { background: var(--success); }
+    
+    .progress-bar {
       display: flex;
-      gap: 6px;
-      margin-top: 12px;
+      gap: 4px;
+      margin-top: 16px;
     }
-    .progress-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 4px;
-      background: #333;
+    
+    .progress-segment {
+      height: 4px;
+      flex: 1;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background 0.3s ease;
     }
-    .progress-dot.active { background: #4a9eff; }
-    .section { margin: 16px; }
+    
+    .progress-segment.active { background: var(--accent); }
+    .progress-segment.completed { background: var(--success); }
+    
+    .section {
+      padding: 24px;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
     .section-title {
-      color: #888;
       font-size: 13px;
       font-weight: 600;
+      color: var(--text-tertiary);
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-      padding-left: 4px;
+      letter-spacing: 0.5px;
     }
+    
     .exercise-card {
-      background: #1a1a1a;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 10px;
-      border: 1px solid #2a2a2a;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
       cursor: pointer;
+      transition: all 0.2s ease;
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
+      border: 2px solid transparent;
     }
-    .exercise-card.logged { border-color: #22c55e; }
+    
+    .exercise-card:hover { 
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    
+    .exercise-card.logged { 
+      border-color: var(--success);
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--success-light) 100%);
+    }
+    
     .exercise-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #2a2a3a 0%, #1a1a2e 100%);
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--border) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      padding: 8px;
-      color: #4a9eff;
+      color: var(--accent);
     }
-    .exercise-icon svg {
-      width: 100%;
-      height: 100%;
-    }
-    .exercise-content {
-      flex: 1;
-      min-width: 0;
-    }
+    
+    .exercise-icon svg { width: 28px; height: 28px; }
+    
+    .exercise-content { flex: 1; min-width: 0; }
+    
     .exercise-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 4px;
     }
+    
     .exercise-name {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
-      flex: 1;
-    }
-    .exercise-target {
-      color: #4a9eff;
-      font-size: 13px;
-      font-weight: 500;
-      flex-shrink: 0;
-      margin-left: 8px;
-    }
-    .exercise-last {
-      color: #888;
-      font-size: 12px;
-    }
-    .exercise-notes {
-      color: #666;
-      font-size: 11px;
-      margin-top: 4px;
-      font-style: italic;
-    }
-    .check-icon {
-      color: #22c55e;
-      margin-left: 6px;
-    }
-    .complete-btn {
-      position: fixed;
-      bottom: max(20px, env(safe-area-inset-bottom));
-      left: 20px;
-      right: 20px;
-      background: linear-gradient(135deg, #4a9eff 0%, #3b82f6 100%);
-      color: #fff;
-      border: none;
-      padding: 18px;
-      border-radius: 16px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      z-index: 100;
-    }
-    .complete-btn.syncing { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 200;
+      color: var(--text-primary);
       display: flex;
-      align-items: flex-end;
-    }
-    .modal {
-      background: #1a1a1a;
-      width: 100%;
-      max-height: 90vh;
-      border-radius: 20px 20px 0 0;
-      overflow: hidden;
-    }
-    .modal-header {
-      background: #252525;
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #333;
+      gap: 8px;
     }
-    .modal-title { font-size: 18px; font-weight: 600; }
-    .modal-close {
-      background: #333;
-      border: none;
-      color: #fff;
-      width: 32px;
-      height: 32px;
-      border-radius: 16px;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .modal-body {
-      padding: 20px;
-      overflow-y: auto;
-      max-height: calc(90vh - 160px);
-    }
-    .modal-footer {
-      padding: 20px;
-      padding-bottom: max(20px, env(safe-area-inset-bottom));
-      border-top: 1px solid #333;
-    }
-    .modal-exercise-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #2a2a3a 0%, #1a1a2e 100%);
+    
+    .check-badge {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--success);
+      color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 16px;
-      padding: 16px;
-      color: #4a9eff;
+      font-size: 12px;
     }
-    .modal-exercise-icon svg {
-      width: 100%;
-      height: 100%;
+    
+    .exercise-target {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
     }
-    .input-label {
-      color: #888;
+    
+    .exercise-last {
       font-size: 13px;
-      margin-bottom: 8px;
-      display: block;
+      color: var(--text-tertiary);
     }
-    .set-row {
+    
+    .exercise-notes {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    
+    .additional-section {
+      background: linear-gradient(135deg, var(--success-light) 0%, #f0fdf4 100%);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      border: 1px solid rgba(52, 199, 89, 0.2);
+    }
+    
+    .additional-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--success);
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 10px;
-      padding: 10px;
-      background: #252525;
-      border-radius: 10px;
     }
-    .set-label { color: #888; font-size: 14px; width: 45px; flex-shrink: 0; }
-    .set-input {
-      width: 60px;
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 8px;
-      padding: 10px 6px;
-      color: #fff;
-      font-size: 16px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .set-input:focus { outline: none; border-color: #4a9eff; }
-    .set-x { color: #666; font-size: 14px; }
-    .set-unit { color: #666; font-size: 12px; width: 30px; }
-    .add-set-btn, .add-cardio-btn {
-      width: 100%;
-      background: transparent;
-      border: 2px dashed #333;
-      color: #666;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-    .add-cardio-btn {
-      border-color: #22c55e;
-      color: #22c55e;
-      margin-top: 0;
-    }
-    .bench-toggle, .activity-toggle {
-      flex: 1;
-      background: #252525;
-      border: 2px solid #333;
-      color: #888;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .bench-toggle.active, .activity-toggle.active {
-      background: #1a2a3a;
-      border-color: #4a9eff;
-      color: #4a9eff;
-    }
-    .activity-toggle.active-green {
-      background: #1a2a1a;
-      border-color: #22c55e;
-      color: #22c55e;
-    }
-    .save-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-      color: #fff;
-      border: none;
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .last-performance, .modal-notes {
-      background: #252525;
-      border-radius: 10px;
-      padding: 12px;
+    
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
       margin-bottom: 16px;
     }
-    .last-performance-title, .modal-notes-title {
-      color: #888;
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-    .last-performance-value { color: #4a9eff; font-size: 14px; font-weight: 500; }
-    .modal-notes-text { color: #ccc; font-size: 13px; }
-    .settings-input, .notes-input {
-      width: 100%;
-      background: #252525;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 14px;
-      color: #fff;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-    .settings-input:focus, .notes-input:focus { outline: none; border-color: #4a9eff; }
-    .settings-description {
-      color: #888;
+    
+    .activity-btn {
+      padding: 12px 8px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
       font-size: 13px;
-      margin-bottom: 12px;
-      line-height: 1.5;
-    }
-    .duration-input, .seconds-input {
-      width: 100%;
-      background: #252525;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 14px;
-      color: #fff;
-      font-size: 16px;
-    }
-    .duration-input:focus, .seconds-input:focus { outline: none; border-color: #4a9eff; }
-    .notes-section {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #333;
-    }
-    .notes-input {
-      min-height: 70px;
-      resize: vertical;
-    }
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 20px;
-      right: 20px;
-      background: #22c55e;
-      color: #fff;
-      padding: 16px;
-      border-radius: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
       text-align: center;
-      font-size: 14px;
-      z-index: 300;
-      animation: fadeIn 0.3s ease;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .hidden { display: none !important; }
-    .additional-exercise-section {
-      background: #1a2a1a;
-      border: 1px solid #22c55e33;
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 16px;
+    
+    .activity-btn:hover { border-color: var(--text-tertiary); }
+    
+    .activity-btn.active {
+      border-color: var(--success);
+      background: var(--success);
+      color: white;
     }
-    .additional-exercise-title {
-      color: #22c55e;
-      font-size: 13px;
+    
+    .input-field {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      margin-bottom: 12px;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-light);
+    }
+    
+    .input-field::placeholder { color: var(--text-tertiary); }
+    
+    .complete-btn {
+      position: fixed;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      left: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, var(--accent) 0%, #0077ed 100%);
+      color: white;
+      border: none;
+      padding: 18px 32px;
+      border-radius: var(--radius-xl);
+      font-size: 17px;
       font-weight: 600;
-      margin-bottom: 10px;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg), 0 4px 20px rgba(0, 113, 227, 0.3);
+      transition: all 0.2s ease;
+      z-index: 100;
+    }
+    
+    .complete-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg), 0 6px 25px rgba(0, 113, 227, 0.4);
+    }
+    
+    .complete-btn:disabled {
+      background: var(--border);
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .fab {
+      position: fixed;
+      bottom: max(100px, calc(env(safe-area-inset-bottom) + 80px));
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--text-primary);
+      color: white;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 99;
     }
-    .cardio-input {
+    
+    .fab:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal {
+      background: var(--bg-secondary);
       width: 100%;
-      background: #252525;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 12px;
-      color: #fff;
-      font-size: 14px;
+      max-height: 90vh;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
     }
-    .cardio-input:focus { outline: none; border-color: #22c55e; }
-    .extra-cardio-card {
-      background: #1a2a1a;
-      border: 1px solid #22c55e33;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 10px;
+    
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
     }
-    .extra-cardio-card.logged { border-color: #22c55e; }
-    .extra-cardio-header {
+    
+    .modal-header {
+      padding: 20px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
     }
-    .extra-cardio-title {
-      color: #22c55e;
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(90vh - 180px);
+    }
+    
+    .modal-footer {
+      padding: 20px 24px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+    }
+    
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--border) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: var(--accent);
+    }
+    
+    .modal-icon svg { width: 40px; height: 40px; }
+    
+    .info-card {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .info-card-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    
+    .info-card-value {
+      font-size: 15px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    
+    .set-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .set-row.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    
+    .set-row.saved {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+    
+    .set-number {
       font-size: 14px;
       font-weight: 600;
+      color: var(--text-tertiary);
+      width: 50px;
     }
-    .remove-cardio-btn {
-      background: transparent;
+    
+    .set-input {
+      width: 70px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      font-family: inherit;
+    }
+    
+    .set-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .set-divider {
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+    
+    .set-save-btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
       border: none;
-      color: #666;
-      font-size: 18px;
+      background: var(--accent);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      padding: 4px 8px;
+      transition: all 0.2s ease;
+      margin-left: auto;
     }
-    .activity-buttons {
+    
+    .set-save-btn.saved {
+      background: var(--success);
+    }
+    
+    .add-set-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 2px dashed var(--border);
+      background: transparent;
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+    
+    .add-set-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .save-finish-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: linear-gradient(135deg, var(--success) 0%, #2db84c 100%);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+    }
+    
+    .notes-area {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+      margin-top: 16px;
+    }
+    
+    .notes-area:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 24px;
+      right: 24px;
+      background: var(--text-primary);
+      color: white;
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 500;
+      z-index: 300;
+      animation: slideUp 0.3s ease;
       display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
     }
+    
+    .toast-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    /* Log Type Selection */
+    .log-type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 20px;
+    }
+    
+    .log-type-card {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      transition: all 0.2s ease;
+    }
+    
+    .log-type-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .log-type-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    
+    .log-type-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .event-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .event-option {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: var(--bg-secondary);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    
+    .event-option:hover { border-color: var(--text-tertiary); }
+    
+    .event-option.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    
+    .event-option-icon { font-size: 24px; margin-bottom: 8px; }
+    .event-option-label { font-size: 14px; font-weight: 500; }
+    
+    .hidden { display: none !important; }
+    
     #sync-iframe { display: none; }
   </style>
 </head>
@@ -452,7 +712,7 @@
       stepup: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="26" width="16" height="10" rx="1"/><circle cx="28" cy="8" r="4"/><path d="M28 12v6M24 18l-8 8M32 18v12M24 30v6"/></svg>`,
       legext: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="14" width="14" height="12" rx="1"/><circle cx="24" cy="10" r="4"/><path d="M18 20h6l2-4M24 16v4l10 4"/><circle cx="36" cy="24" r="2" fill="currentColor"/></svg>`,
       legcurl: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="18" width="24" height="6" rx="1"/><circle cx="8" cy="16" r="4"/><path d="M26 21l6-8"/><circle cx="34" cy="11" r="2" fill="currentColor"/></svg>`,
-      calfraise: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="6" r="4"/><path d="M20 10v12M16 22l-2 6 2 4M24 22l2 6-2 4"/><rect x="10" y="34" width="20" height="4" rx="1"/><ellipse cx="20" cy="18" rx="6" ry="3" fill="currentColor" opacity="0.3"/></svg>`,
+      calfraise: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="6" r="4"/><path d="M20 10v12M16 22l-2 6 2 4M24 22l2 6-2 4"/><rect x="10" y="34" width="20" height="4" rx="1"/></svg>`,
       farmerscarry: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="20" cy="6" r="4"/><path d="M20 10v10M16 20v-6M24 20v-6M16 26v8M24 26v8"/><rect x="6" y="18" width="6" height="10" rx="1" fill="currentColor" opacity="0.3"/><rect x="28" y="18" width="6" height="10" rx="1" fill="currentColor" opacity="0.3"/></svg>`,
       deadhang: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="32" height="4" rx="1"/><circle cx="20" cy="14" r="4"/><path d="M16 8v4M24 8v4M20 18v10M16 28v8M24 28v8"/></svg>`,
       cardio: `<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="28" r="6"/><circle cx="30" cy="28" r="6"/><path d="M10 28l8-12h8l4 12M18 16l-4 12M22 10l4-4"/><circle cx="26" cy="6" r="3"/></svg>`,
@@ -491,7 +751,7 @@
     }
 
     const WORKOUTS = [
-      { id: "lower-a", name: "Lower Body A: Deadlift Focus", category: "Strength", sections: [
+      { id: "lower-a", name: "Lower Body A", subtitle: "Deadlift Focus", category: "Strength", sections: [
           { name: "Compounds", exercises: [
             { id: "trap-deadlift", name: "Trap Bar Deadlift", sets: 4, reps: "6-8", type: "weighted" },
             { id: "goblet-squat", name: "Goblet Squat", sets: 3, reps: "10-12", type: "weighted" },
@@ -508,12 +768,12 @@
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
         ], hasAdditionalExercise: true },
-      { id: "zone2-1", name: "Zone 2 Cardio", category: "Cardio", sections: [
+      { id: "zone2-1", name: "Zone 2 Cardio", subtitle: "Recovery Day", category: "Cardio", sections: [
           { name: "Cardio", exercises: [
-            { id: "zone2-a", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140. Bike, treadmill 15%, row, or ruck.", type: "cardio" }
+            { id: "zone2-a", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140", type: "cardio" }
           ]}
         ], allowExtraCardio: true },
-      { id: "upper-a", name: "Upper Body A: Pull Focus", category: "Strength", sections: [
+      { id: "upper-a", name: "Upper Body A", subtitle: "Pull Focus", category: "Strength", sections: [
           { name: "Compounds", exercises: [
             { id: "chin-ups", name: "Chin-Ups", sets: 4, reps: "6-10", notes: "Supinated grip", type: "bodyweight" },
             { id: "bb-row", name: "Barbell Row", sets: 4, reps: "8-10", notes: "Elbows tucked", type: "weighted" },
@@ -530,12 +790,12 @@
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
         ], hasAdditionalExercise: true },
-      { id: "zone2-2", name: "Zone 2 Cardio", category: "Cardio", sections: [
+      { id: "zone2-2", name: "Zone 2 Cardio", subtitle: "Recovery Day", category: "Cardio", sections: [
           { name: "Cardio", exercises: [
-            { id: "zone2-b", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140. Steady state.", type: "cardio" }
+            { id: "zone2-b", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", notes: "HR 115-140", type: "cardio" }
           ]}
         ], allowExtraCardio: true },
-      { id: "lower-b", name: "Lower Body B: Squat Focus", category: "Strength", sections: [
+      { id: "lower-b", name: "Lower Body B", subtitle: "Squat Focus", category: "Strength", sections: [
           { name: "Compounds", exercises: [
             { id: "back-squat", name: "Back Squat", sets: 4, reps: "8-10", notes: "Full depth", type: "weighted" },
             { id: "rdl", name: "Romanian Deadlift", sets: 3, reps: "8-10", type: "weighted" },
@@ -552,15 +812,15 @@
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
         ], hasAdditionalExercise: true },
-      { id: "vo2max", name: "Zone 2 + VO2 Max", category: "Cardio", sections: [
+      { id: "vo2max", name: "Zone 2 + VO2 Max", subtitle: "Interval Day", category: "Cardio", sections: [
           { name: "Zone 2", exercises: [
             { id: "zone2-sat", name: "Zone 2 Cardio", sets: 1, reps: "45 min", type: "cardio" }
           ]},
           { name: "VO2 Max", exercises: [
-            { id: "vo2max-int", name: "4x4 Intervals", sets: 4, reps: "4 min on/off", notes: "4-6 rounds total", type: "cardio" }
+            { id: "vo2max-int", name: "4x4 Intervals", sets: 4, reps: "4 min on/off", notes: "Max effort", type: "cardio" }
           ]}
         ], allowExtraCardio: true },
-      { id: "upper-b", name: "Zone 2 + Upper Body B", category: "Cardio + Strength", sections: [
+      { id: "upper-b", name: "Upper Body B", subtitle: "Zone 2 + Push", category: "Mixed", sections: [
           { name: "Zone 2", exercises: [
             { id: "zone2-sun", name: "Zone 2 Cardio", sets: 1, reps: "45-60 min", type: "cardio" }
           ]},
@@ -590,41 +850,50 @@
       syncing: false,
       toast: null,
       additionalExercise: { type: '', customName: '', duration: '', notes: '' },
-      extraCardios: []
+      extraCardios: [],
+      savedSets: {},
+      lastLedDuration: localStorage.getItem('lastLedDuration') || '20 min',
+      showLogTypeMenu: false
     };
 
     function save() {
       localStorage.setItem('workoutIndex', state.workoutIndex);
       localStorage.setItem('exerciseLogs', JSON.stringify(state.exerciseLogs));
       localStorage.setItem('googleUrl', state.googleUrl);
+      localStorage.setItem('lastLedDuration', state.lastLedDuration);
     }
 
     function render() {
       const workout = WORKOUTS[state.workoutIndex];
-      const catClass = workout.category === 'Cardio' ? 'cardio' : workout.category.includes('+') ? 'mixed' : '';
+      const catClass = workout.category.toLowerCase();
       
       let html = `
         <header class="header">
           <div class="header-top">
-            <h1 class="workout-name">${workout.name}</h1>
-            <div class="header-buttons">
-              <button class="settings-btn" onclick="showSettings()">⚙️</button>
-              <button class="skip-btn" onclick="skipWorkout()">Skip</button>
+            <span class="logo">Body Log</span>
+            <div class="header-actions">
+              <button class="icon-btn" onclick="showSettings()">⚙️</button>
+              <button class="icon-btn" onclick="skipWorkout()">⏭️</button>
             </div>
           </div>
-          <span class="category-badge ${catClass}">${workout.category}</span>
-          <span class="sync-status">
-            <span class="sync-dot ${state.googleUrl ? 'connected' : ''}"></span>
-            ${state.googleUrl ? 'Syncing' : 'Local only'}
-          </span>
-          <div class="progress-indicator">
-            ${WORKOUTS.map((_, i) => `<div class="progress-dot ${i === state.workoutIndex ? 'active' : ''}"></div>`).join('')}
+          <h1 class="workout-title">${workout.name}</h1>
+          <div class="workout-meta">
+            <span class="badge ${catClass}">${workout.category}</span>
+            <span class="sync-indicator">
+              <span class="sync-dot ${state.googleUrl ? 'connected' : ''}"></span>
+              ${state.googleUrl ? 'Synced' : 'Local'}
+            </span>
+          </div>
+          <div class="progress-bar">
+            ${WORKOUTS.map((_, i) => `<div class="progress-segment ${i < state.workoutIndex ? 'completed' : ''} ${i === state.workoutIndex ? 'active' : ''}"></div>`).join('')}
           </div>
         </header>
 
         ${workout.sections.map(section => `
           <div class="section">
-            <h2 class="section-title">${section.name}</h2>
+            <div class="section-header">
+              <span class="section-title">${section.name}</span>
+            </div>
             ${section.exercises.map(ex => {
               const logged = !!state.sessionLogs[ex.id];
               const last = getLastLog(ex.id, ex);
@@ -634,10 +903,13 @@
                   <div class="exercise-icon">${icon}</div>
                   <div class="exercise-content">
                     <div class="exercise-header">
-                      <span class="exercise-name">${ex.name}${logged ? '<span class="check-icon">✓</span>' : ''}</span>
+                      <span class="exercise-name">
+                        ${ex.name}
+                        ${logged ? '<span class="check-badge">✓</span>' : ''}
+                      </span>
                       <span class="exercise-target">${ex.sets} × ${ex.reps}</span>
                     </div>
-                    <div class="exercise-last">Last: ${last}</div>
+                    <div class="exercise-last">${last}</div>
                     ${ex.notes ? `<div class="exercise-notes">${ex.notes}</div>` : ''}
                   </div>
                 </div>
@@ -646,74 +918,223 @@
           </div>
         `).join('')}
 
-        ${workout.allowExtraCardio ? `
+        ${workout.allowExtraCardio || workout.hasAdditionalExercise ? `
           <div class="section">
-            <h2 class="section-title">Additional Exercise</h2>
-            ${state.extraCardios.map((cardio, i) => `
-              <div class="extra-cardio-card ${cardio.duration ? 'logged' : ''}">
-                <div class="extra-cardio-header">
-                  <div style="display:flex;align-items:center;gap:8px;">
-                    <div class="exercise-icon" style="width:36px;height:36px;padding:6px;">${SVG_ICONS[cardio.type] || SVG_ICONS.cardio}</div>
-                    <span class="extra-cardio-title">${cardio.name || 'Additional Exercise'}</span>
-                  </div>
-                  <button class="remove-cardio-btn" onclick="removeExtraCardio(${i})">×</button>
-                </div>
-                <div class="activity-buttons">
-                  <button class="activity-toggle ${cardio.type === 'run' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'run', 'Run')">🏃 Run</button>
-                  <button class="activity-toggle ${cardio.type === 'bike' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'bike', 'Bike')">🚴 Bike</button>
-                  <button class="activity-toggle ${cardio.type === 'class' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'class', 'Class')">🧘 Class</button>
-                  <button class="activity-toggle ${cardio.type === 'other' ? 'active-green' : ''}" onclick="setExtraCardioType(${i}, 'other', '')">✏️ Other</button>
-                </div>
-                ${cardio.type === 'other' ? `<input type="text" class="cardio-input" placeholder="Activity name" value="${cardio.name}" onchange="updateExtraCardio(${i}, 'name', this.value)" style="margin-bottom:8px">` : ''}
-                <input type="text" class="cardio-input" placeholder="Duration (e.g., 30 min)" value="${cardio.duration}" onchange="updateExtraCardio(${i}, 'duration', this.value)" style="margin-bottom:8px">
-                <input type="text" class="cardio-input" placeholder="Notes (optional)" value="${cardio.notes || ''}" onchange="updateExtraCardio(${i}, 'notes', this.value)">
+            <div class="additional-section">
+              <div class="additional-title">➕ Additional Exercise</div>
+              <div class="activity-grid">
+                <button class="activity-btn ${state.additionalExercise.type === 'run' ? 'active' : ''}" onclick="setAdditionalType('run', 'Run')">🏃 Run</button>
+                <button class="activity-btn ${state.additionalExercise.type === 'bike' ? 'active' : ''}" onclick="setAdditionalType('bike', 'Bike')">🚴 Bike</button>
+                <button class="activity-btn ${state.additionalExercise.type === 'class' ? 'active' : ''}" onclick="setAdditionalType('class', 'Class')">🧘 Class</button>
+                <button class="activity-btn ${state.additionalExercise.type === 'other' ? 'active' : ''}" onclick="setAdditionalType('other', '')">✏️ Other</button>
               </div>
-            `).join('')}
-            <button class="add-cardio-btn" onclick="addExtraCardio()">+ Add Exercise</button>
-          </div>
-        ` : ''}
-
-        ${workout.hasAdditionalExercise ? `
-          <div class="section">
-            <div class="additional-exercise-section">
-              <div class="additional-exercise-title"><span style="display:inline-flex;width:20px;height:20px;color:#22c55e;margin-right:4px;">${SVG_ICONS.cardio}</span> Additional Exercise</div>
-              <div class="activity-buttons">
-                <button class="activity-toggle ${state.additionalExercise.type === 'run' ? 'active-green' : ''}" onclick="setAdditionalType('run', 'Run')">🏃 Run</button>
-                <button class="activity-toggle ${state.additionalExercise.type === 'bike' ? 'active-green' : ''}" onclick="setAdditionalType('bike', 'Bike')">🚴 Bike</button>
-                <button class="activity-toggle ${state.additionalExercise.type === 'class' ? 'active-green' : ''}" onclick="setAdditionalType('class', 'Class')">🧘 Class</button>
-                <button class="activity-toggle ${state.additionalExercise.type === 'other' ? 'active-green' : ''}" onclick="setAdditionalType('other', '')">✏️ Other</button>
-              </div>
-              ${state.additionalExercise.type === 'other' ? `<input type="text" class="cardio-input" id="additional-custom-name" placeholder="Activity name" value="${state.additionalExercise.customName}" onchange="state.additionalExercise.customName = this.value" style="margin-bottom:8px">` : ''}
-              <input type="text" class="cardio-input" id="additional-duration" placeholder="Duration (e.g., 30 min)" value="${state.additionalExercise.duration}" onchange="state.additionalExercise.duration = this.value" style="margin-bottom:8px">
-              <input type="text" class="cardio-input" id="additional-notes" placeholder="Notes (optional)" value="${state.additionalExercise.notes}" onchange="state.additionalExercise.notes = this.value">
+              ${state.additionalExercise.type === 'other' ? `<input type="text" class="input-field" id="additional-custom-name" placeholder="Activity name" value="${state.additionalExercise.customName}" onchange="state.additionalExercise.customName = this.value">` : ''}
+              <input type="text" class="input-field" id="additional-duration" placeholder="Duration (e.g., 30 min)" value="${state.additionalExercise.duration}" onchange="state.additionalExercise.duration = this.value">
+              <input type="text" class="input-field" id="additional-notes" placeholder="Notes (optional)" value="${state.additionalExercise.notes}" onchange="state.additionalExercise.notes = this.value" style="margin-bottom:0">
             </div>
           </div>
         ` : ''}
 
-        <button class="complete-btn ${state.syncing ? 'syncing' : ''}" onclick="completeWorkout()" ${state.syncing ? 'disabled' : ''}>
-          ${state.syncing ? 'Syncing...' : 'Complete Workout'}
+        <button class="fab" onclick="showLogTypeMenu()">+</button>
+
+        <button class="complete-btn" onclick="completeWorkout()" ${state.syncing ? 'disabled' : ''}>
+          ${state.syncing ? 'Saving...' : 'Complete Workout'}
         </button>
 
-        ${state.toast ? `<div class="toast">${state.toast}</div>` : ''}
+        ${state.toast ? `<div class="toast"><span class="toast-icon">✓</span>${state.toast}</div>` : ''}
       `;
 
       document.getElementById('app').innerHTML = html;
+      
       if (state.currentModal === 'settings') renderSettingsModal();
+      else if (state.currentModal === 'logType') renderLogTypeModal();
+      else if (state.currentModal === 'health') renderHealthModal();
+      else if (state.currentModal === 'beauty') renderBeautyModal();
       else if (state.currentModal) renderExerciseModal(state.currentModal);
+    }
+
+    function showLogTypeMenu() {
+      state.currentModal = 'logType';
+      render();
+    }
+
+    function renderLogTypeModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">Log Something</h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          <div class="log-type-grid">
+            <div class="log-type-card" onclick="closeModal()">
+              <div class="log-type-icon">🏋️</div>
+              <div class="log-type-label">Exercise</div>
+            </div>
+            <div class="log-type-card" onclick="openHealthModal()">
+              <div class="log-type-icon">💊</div>
+              <div class="log-type-label">Health</div>
+            </div>
+            <div class="log-type-card" onclick="openBeautyModal()">
+              <div class="log-type-icon">✨</div>
+              <div class="log-type-label">Beauty</div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('app').appendChild(modal);
+    }
+
+    function openHealthModal() {
+      state.currentModal = 'health';
+      state.healthEvent = { type: '', notes: '' };
+      render();
+    }
+
+    function renderHealthModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">Health Event</h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="event-options">
+              <div class="event-option ${state.healthEvent?.type === 'medication' ? 'active' : ''}" onclick="setHealthType('medication')">
+                <div class="event-option-icon">💊</div>
+                <div class="event-option-label">Medication Change</div>
+              </div>
+              <div class="event-option ${state.healthEvent?.type === 'appointment' ? 'active' : ''}" onclick="setHealthType('appointment')">
+                <div class="event-option-icon">🩺</div>
+                <div class="event-option-label">Appointment</div>
+              </div>
+              <div class="event-option ${state.healthEvent?.type === 'other' ? 'active' : ''}" onclick="setHealthType('other')">
+                <div class="event-option-icon">📝</div>
+                <div class="event-option-label">Other</div>
+              </div>
+            </div>
+            <textarea class="notes-area" id="health-notes" placeholder="Details...">${state.healthEvent?.notes || ''}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button class="save-finish-btn" onclick="saveHealthEvent()">Save Health Event</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('app').appendChild(modal);
+    }
+
+    function setHealthType(type) {
+      state.healthEvent = state.healthEvent || {};
+      state.healthEvent.type = type;
+      render();
+    }
+
+    function saveHealthEvent() {
+      const notes = document.getElementById('health-notes').value;
+      const typeLabels = { medication: 'Medication change', appointment: 'Appointment', other: 'Health note' };
+      const activity = typeLabels[state.healthEvent.type] || 'Health event';
+      
+      if (state.googleUrl) {
+        syncToGoogle({ logType: 'health', activity, notes });
+      }
+      showToast('Health event logged!');
+      closeModal();
+    }
+
+    function openBeautyModal() {
+      state.currentModal = 'beauty';
+      state.beautyEvent = { type: '', details: '', notes: '' };
+      render();
+    }
+
+    function renderBeautyModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">Beauty Event</h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="event-options">
+              <div class="event-option ${state.beautyEvent?.type === 'botox' ? 'active' : ''}" onclick="setBeautyType('botox')">
+                <div class="event-option-icon">💉</div>
+                <div class="event-option-label">Botox/Dysport</div>
+              </div>
+              <div class="event-option ${state.beautyEvent?.type === 'microneedling' ? 'active' : ''}" onclick="setBeautyType('microneedling')">
+                <div class="event-option-icon">✨</div>
+                <div class="event-option-label">Microneedling</div>
+              </div>
+              <div class="event-option ${state.beautyEvent?.type === 'led' ? 'active' : ''}" onclick="setBeautyType('led')">
+                <div class="event-option-icon">💡</div>
+                <div class="event-option-label">LED Session</div>
+              </div>
+              <div class="event-option ${state.beautyEvent?.type === 'other' ? 'active' : ''}" onclick="setBeautyType('other')">
+                <div class="event-option-icon">📝</div>
+                <div class="event-option-label">Other</div>
+              </div>
+            </div>
+            ${state.beautyEvent?.type === 'botox' ? `
+              <input type="text" class="input-field" id="beauty-details" placeholder="Units (e.g., 40 units Dysport)" value="${state.beautyEvent?.details || ''}">
+            ` : ''}
+            ${state.beautyEvent?.type === 'led' ? `
+              <input type="text" class="input-field" id="beauty-duration" placeholder="Duration" value="${state.beautyEvent?.duration || state.lastLedDuration}">
+            ` : ''}
+            ${state.beautyEvent?.type === 'other' ? `
+              <input type="text" class="input-field" id="beauty-custom" placeholder="Treatment name" value="${state.beautyEvent?.customName || ''}">
+            ` : ''}
+            <textarea class="notes-area" id="beauty-notes" placeholder="Notes (optional)">${state.beautyEvent?.notes || ''}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button class="save-finish-btn" onclick="saveBeautyEvent()">Save Beauty Event</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('app').appendChild(modal);
+    }
+
+    function setBeautyType(type) {
+      state.beautyEvent = state.beautyEvent || {};
+      state.beautyEvent.type = type;
+      render();
+    }
+
+    function saveBeautyEvent() {
+      const notes = document.getElementById('beauty-notes')?.value || '';
+      let activity = '';
+      let duration = '';
+      
+      if (state.beautyEvent.type === 'botox') {
+        const details = document.getElementById('beauty-details')?.value || '';
+        activity = details ? `Botox: ${details}` : 'Botox';
+      } else if (state.beautyEvent.type === 'microneedling') {
+        activity = 'Microneedling';
+      } else if (state.beautyEvent.type === 'led') {
+        duration = document.getElementById('beauty-duration')?.value || state.lastLedDuration;
+        state.lastLedDuration = duration;
+        save();
+        activity = 'LED Session';
+      } else if (state.beautyEvent.type === 'other') {
+        activity = document.getElementById('beauty-custom')?.value || 'Beauty treatment';
+      }
+      
+      if (state.googleUrl) {
+        syncToGoogle({ logType: 'beauty', activity, duration, notes });
+      }
+      showToast('Beauty event logged!');
+      closeModal();
     }
 
     function setAdditionalType(type, name) {
       state.additionalExercise.type = type;
-      state.additionalExercise.customName = name;
-      render();
-    }
-
-    function addExtraCardio() { state.extraCardios.push({ type: '', name: '', duration: '', notes: '' }); render(); }
-    function removeExtraCardio(index) { state.extraCardios.splice(index, 1); render(); }
-    function updateExtraCardio(index, field, value) { state.extraCardios[index][field] = value; }
-    function setExtraCardioType(index, type, name) {
-      state.extraCardios[index].type = type;
-      if (type !== 'other') state.extraCardios[index].name = name;
+      state.additionalExercise.customName = type === 'other' ? '' : name;
       render();
     }
 
@@ -728,10 +1149,10 @@
       }
       if (ex.type === 'bench-choice') {
         const prefix = last.benchType === 'bb' ? 'BB: ' : 'DB: ';
-        if (last.sets && last.sets.length) return prefix + last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : s.reps ? `${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
+        if (last.sets && last.sets.length) return prefix + last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
         return 'Completed';
       }
-      if (last.sets && last.sets.length) return last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : s.reps ? `${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
+      if (last.sets && last.sets.length) return last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
       return 'Completed';
     }
 
@@ -740,7 +1161,12 @@
       return null;
     }
 
-    function openExercise(id) { state.currentModal = id; render(); }
+    function openExercise(id) { 
+      state.currentModal = id; 
+      if (!state.savedSets[id]) state.savedSets[id] = {};
+      render(); 
+    }
+    
     function closeModal() { state.currentModal = null; render(); }
     function showSettings() { state.currentModal = 'settings'; render(); }
 
@@ -755,48 +1181,139 @@
       const icon = getExerciseIcon(ex.id);
       const currentNotes = current?.userNotes || '';
       const currentBenchType = current?.benchType || lastLog?.benchType || 'db';
+      const savedSets = state.savedSets[id] || {};
       
       let setsHtml = '';
       if (isCardio) {
         const val = current?.duration || lastLog?.duration || '';
-        setsHtml = `<div style="margin-bottom:16px"><label class="input-label">Duration / Notes</label><input type="text" class="duration-input" id="duration-input" value="${val}" placeholder="e.g., 45 min, 120 bpm avg"></div>`;
+        setsHtml = `<input type="text" class="input-field" id="duration-input" value="${val}" placeholder="Duration (e.g., 45 min)">`;
       } else if (isSeconds) {
         const numSets = ex.sets;
         let sets = current?.sets || [];
         if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ seconds: lastLog?.sets?.[i]?.seconds || '' });
-        setsHtml = `<div style="margin-bottom:8px"><label class="input-label">Target: ${ex.sets} × ${ex.reps}</label></div><div id="sets-container">${sets.map((s, i) => `<div class="set-row"><span class="set-label">Set ${i + 1}</span><input type="number" class="set-input" data-set="${i}" data-field="seconds" value="${s.seconds}" placeholder="sec" style="flex:1;width:auto;"><span class="set-unit">sec</span></div>`).join('')}</div><button class="add-set-btn" onclick="addSetSeconds()">+ Add Set</button>`;
+        setsHtml = `<div id="sets-container">${sets.map((s, i) => `
+          <div class="set-row ${savedSets[i] ? 'saved' : ''}" id="set-row-${i}">
+            <span class="set-number">Set ${i + 1}</span>
+            <input type="number" class="set-input" data-set="${i}" data-field="seconds" value="${s.seconds}" placeholder="sec" onchange="autoPopulateSeconds(${i})">
+            <span class="set-divider">seconds</span>
+            <button class="set-save-btn ${savedSets[i] ? 'saved' : ''}" onclick="saveSet('${id}', ${i}, 'seconds')">${savedSets[i] ? '✓' : 'Save'}</button>
+          </div>
+        `).join('')}</div><button class="add-set-btn" onclick="addSetSeconds()">+ Add Set</button>`;
       } else if (isBenchChoice) {
         const numSets = ex.sets;
         let sets = current?.sets || [];
         if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ weight: lastLog?.sets?.[i]?.weight || '', reps: lastLog?.sets?.[i]?.reps || '' });
-        setsHtml = `<div style="margin-bottom:16px"><label class="input-label">Equipment</label><div style="display:flex;gap:8px;"><button type="button" id="btn-db" class="bench-toggle ${currentBenchType === 'db' ? 'active' : ''}" onclick="selectBenchType('db')">🏋️ Dumbbell</button><button type="button" id="btn-bb" class="bench-toggle ${currentBenchType === 'bb' ? 'active' : ''}" onclick="selectBenchType('bb')">🏋️ Barbell</button></div><input type="hidden" id="bench-type-input" value="${currentBenchType}"></div><div style="margin-bottom:8px"><label class="input-label">Target: ${ex.sets} × ${ex.reps}</label><div id="weight-hint" style="color:#666;font-size:12px;margin-top:4px;">${currentBenchType === 'db' ? 'Enter weight per dumbbell' : 'Enter total barbell weight'}</div></div><div id="sets-container">${sets.map((s, i) => `<div class="set-row"><span class="set-label">Set ${i + 1}</span><input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs"><span class="set-x">×</span><input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps"></div>`).join('')}</div><button class="add-set-btn" onclick="addSet()">+ Add Set</button>`;
+        setsHtml = `
+          <div style="display:flex;gap:8px;margin-bottom:20px;">
+            <button class="activity-btn ${currentBenchType === 'db' ? 'active' : ''}" onclick="selectBenchType('db')" style="flex:1">🏋️ Dumbbell</button>
+            <button class="activity-btn ${currentBenchType === 'bb' ? 'active' : ''}" onclick="selectBenchType('bb')" style="flex:1">🏋️ Barbell</button>
+          </div>
+          <input type="hidden" id="bench-type-input" value="${currentBenchType}">
+          <div id="sets-container">${sets.map((s, i) => `
+            <div class="set-row ${savedSets[i] ? 'saved' : ''}" id="set-row-${i}">
+              <span class="set-number">Set ${i + 1}</span>
+              <input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs" onchange="autoPopulate(${i}, 'weight')">
+              <span class="set-divider">×</span>
+              <input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps" onchange="autoPopulate(${i}, 'reps')">
+              <button class="set-save-btn ${savedSets[i] ? 'saved' : ''}" onclick="saveSet('${id}', ${i}, 'weighted')">${savedSets[i] ? '✓' : 'Save'}</button>
+            </div>
+          `).join('')}</div><button class="add-set-btn" onclick="addSet()">+ Add Set</button>`;
       } else {
         const numSets = ex.sets;
         let sets = current?.sets || [];
         if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ weight: lastLog?.sets?.[i]?.weight || '', reps: lastLog?.sets?.[i]?.reps || '' });
-        setsHtml = `<div style="margin-bottom:8px"><label class="input-label">Target: ${ex.sets} × ${ex.reps}</label></div><div id="sets-container">${sets.map((s, i) => `<div class="set-row"><span class="set-label">Set ${i + 1}</span><input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs"><span class="set-x">×</span><input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps"></div>`).join('')}</div><button class="add-set-btn" onclick="addSet()">+ Add Set</button>`;
+        setsHtml = `<div id="sets-container">${sets.map((s, i) => `
+          <div class="set-row ${savedSets[i] ? 'saved' : ''}" id="set-row-${i}">
+            <span class="set-number">Set ${i + 1}</span>
+            <input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs" onchange="autoPopulate(${i}, 'weight')">
+            <span class="set-divider">×</span>
+            <input type="number" class="set-input" data-set="${i}" data-field="reps" value="${s.reps}" placeholder="reps" onchange="autoPopulate(${i}, 'reps')">
+            <button class="set-save-btn ${savedSets[i] ? 'saved' : ''}" onclick="saveSet('${id}', ${i}, 'weighted')">${savedSets[i] ? '✓' : 'Save'}</button>
+          </div>
+        `).join('')}</div><button class="add-set-btn" onclick="addSet()">+ Add Set</button>`;
       }
 
       let lastDisplay = 'No previous data';
       if (lastLog) {
         if (isCardio) lastDisplay = lastLog.duration || 'Completed';
-        else if (isSeconds) lastDisplay = lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.seconds || '-'} sec`).join('<br>') || 'Completed';
-        else if (isBenchChoice) lastDisplay = `<strong>${lastLog.benchType === 'bb' ? 'Barbell' : 'Dumbbell'}</strong><br>` + (lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.weight || '-'} lbs × ${s.reps || '-'}`).join('<br>') || 'Completed');
-        else lastDisplay = lastLog.sets?.map((s, i) => `Set ${i + 1}: ${s.weight || '-'} lbs × ${s.reps || '-'}`).join('<br>') || 'Completed';
+        else if (isSeconds) lastDisplay = lastLog.sets?.map((s, i) => `${s.seconds}s`).join(', ') || 'Completed';
+        else if (isBenchChoice) lastDisplay = `${lastLog.benchType === 'bb' ? 'BB' : 'DB'}: ` + (lastLog.sets?.map(s => `${s.weight}×${s.reps}`).join(', ') || 'Completed');
+        else lastDisplay = lastLog.sets?.map(s => `${s.weight}×${s.reps}`).join(', ') || 'Completed';
       }
 
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-      modal.innerHTML = `<div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h2 class="modal-title">${ex.name}</h2><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><div class="modal-exercise-icon">${icon}</div>${lastLog ? `<div class="last-performance"><div class="last-performance-title">Last Performance</div><div class="last-performance-value">${lastDisplay}</div></div>` : ''}${ex.notes ? `<div class="modal-notes"><div class="modal-notes-title">Tips</div><div class="modal-notes-text">${ex.notes}</div></div>` : ''}${setsHtml}<div class="notes-section"><label class="input-label">Your Notes (optional)</label><textarea class="notes-input" id="user-notes-input" placeholder="How did it feel? Any adjustments?">${currentNotes}</textarea></div></div><div class="modal-footer"><button class="save-btn" onclick="saveExercise('${id}', '${ex.type}')">Save</button></div></div>`;
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">${ex.name}</h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-icon">${icon}</div>
+            ${lastLog ? `<div class="info-card"><div class="info-card-label">Last Time</div><div class="info-card-value">${lastDisplay}</div></div>` : ''}
+            ${ex.notes ? `<div class="info-card"><div class="info-card-label">Tips</div><div class="info-card-value" style="color:var(--text-secondary)">${ex.notes}</div></div>` : ''}
+            <div class="info-card-label" style="margin-bottom:12px">Target: ${ex.sets} × ${ex.reps}</div>
+            ${setsHtml}
+            <textarea class="notes-area" id="user-notes-input" placeholder="Notes (optional)">${currentNotes}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button class="save-finish-btn" onclick="saveExercise('${id}', '${ex.type}')">Save & Finish</button>
+          </div>
+        </div>
+      `;
       document.getElementById('app').appendChild(modal);
+    }
+
+    function autoPopulate(changedSetIndex, field) {
+      const value = document.querySelector(`input[data-set="${changedSetIndex}"][data-field="${field}"]`).value;
+      if (!value) return;
+      const allInputs = document.querySelectorAll(`input[data-field="${field}"]`);
+      allInputs.forEach(input => {
+        const setIdx = parseInt(input.dataset.set);
+        if (setIdx > changedSetIndex && !input.value) input.value = value;
+      });
+    }
+
+    function autoPopulateSeconds(changedSetIndex) {
+      const value = document.querySelector(`input[data-set="${changedSetIndex}"][data-field="seconds"]`).value;
+      if (!value) return;
+      const allInputs = document.querySelectorAll(`input[data-field="seconds"]`);
+      allInputs.forEach(input => {
+        const setIdx = parseInt(input.dataset.set);
+        if (setIdx > changedSetIndex && !input.value) input.value = value;
+      });
+    }
+
+    function saveSet(exerciseId, setIndex, type) {
+      const row = document.getElementById(`set-row-${setIndex}`);
+      if (type === 'seconds') {
+        const secondsInput = document.querySelector(`input[data-set="${setIndex}"][data-field="seconds"]`);
+        if (secondsInput.value) {
+          state.savedSets[exerciseId] = state.savedSets[exerciseId] || {};
+          state.savedSets[exerciseId][setIndex] = { seconds: secondsInput.value };
+          row.classList.add('saved');
+          row.querySelector('.set-save-btn').textContent = '✓';
+          row.querySelector('.set-save-btn').classList.add('saved');
+        }
+      } else {
+        const weightInput = document.querySelector(`input[data-set="${setIndex}"][data-field="weight"]`);
+        const repsInput = document.querySelector(`input[data-set="${setIndex}"][data-field="reps"]`);
+        if (weightInput.value || repsInput.value) {
+          state.savedSets[exerciseId] = state.savedSets[exerciseId] || {};
+          state.savedSets[exerciseId][setIndex] = { weight: weightInput.value, reps: repsInput.value };
+          row.classList.add('saved');
+          row.querySelector('.set-save-btn').textContent = '✓';
+          row.querySelector('.set-save-btn').classList.add('saved');
+        }
+      }
     }
 
     function selectBenchType(type) {
       document.getElementById('bench-type-input').value = type;
-      document.getElementById('btn-db').classList.toggle('active', type === 'db');
-      document.getElementById('btn-bb').classList.toggle('active', type === 'bb');
-      document.getElementById('weight-hint').textContent = type === 'db' ? 'Enter weight per dumbbell' : 'Enter total barbell weight';
+      document.querySelectorAll('.activity-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
     }
 
     function addSet() {
@@ -804,7 +1321,8 @@
       const count = container.querySelectorAll('.set-row').length;
       const div = document.createElement('div');
       div.className = 'set-row';
-      div.innerHTML = `<span class="set-label">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="weight" placeholder="lbs"><span class="set-x">×</span><input type="number" class="set-input" data-set="${count}" data-field="reps" placeholder="reps">`;
+      div.id = `set-row-${count}`;
+      div.innerHTML = `<span class="set-number">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="weight" placeholder="lbs" onchange="autoPopulate(${count}, 'weight')"><span class="set-divider">×</span><input type="number" class="set-input" data-set="${count}" data-field="reps" placeholder="reps" onchange="autoPopulate(${count}, 'reps')"><button class="set-save-btn" onclick="saveSet('${state.currentModal}', ${count}, 'weighted')">Save</button>`;
       container.appendChild(div);
     }
 
@@ -813,12 +1331,13 @@
       const count = container.querySelectorAll('.set-row').length;
       const div = document.createElement('div');
       div.className = 'set-row';
-      div.innerHTML = `<span class="set-label">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="seconds" placeholder="sec" style="flex:1;width:auto;"><span class="set-unit">sec</span>`;
+      div.id = `set-row-${count}`;
+      div.innerHTML = `<span class="set-number">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="seconds" placeholder="sec" onchange="autoPopulateSeconds(${count})"><span class="set-divider">seconds</span><button class="set-save-btn" onclick="saveSet('${state.currentModal}', ${count}, 'seconds')">Save</button>`;
       container.appendChild(div);
     }
 
     function saveExercise(id, type) {
-      const userNotes = document.getElementById('user-notes-input').value.trim();
+      const userNotes = document.getElementById('user-notes-input')?.value.trim() || '';
       if (type === 'cardio') {
         state.sessionLogs[id] = { duration: document.getElementById('duration-input').value, userNotes };
       } else if (type === 'seconds') {
@@ -845,30 +1364,44 @@
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-      modal.innerHTML = `<div class="modal" onclick="event.stopPropagation()"><div class="modal-header"><h2 class="modal-title">Settings</h2><button class="modal-close" onclick="closeModal()">×</button></div><div class="modal-body"><h3 style="color:#fff;font-size:16px;margin-bottom:12px">Google Sheets Sync</h3><p class="settings-description">Paste your Google Apps Script Web App URL to automatically sync workouts.</p><input type="url" class="settings-input" id="google-url" value="${state.googleUrl}" placeholder="https://script.google.com/macros/s/..."></div><div class="modal-footer"><button class="save-btn" onclick="saveSettings()">Save Settings</button></div></div>`;
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">Settings</h2>
+            <button class="modal-close" onclick="closeModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="info-card-label">Google Sheets Sync</div>
+            <p style="color:var(--text-tertiary);font-size:14px;margin-bottom:16px;">Paste your Google Apps Script URL to sync your logs.</p>
+            <input type="url" class="input-field" id="google-url" value="${state.googleUrl}" placeholder="https://script.google.com/macros/s/...">
+          </div>
+          <div class="modal-footer">
+            <button class="save-finish-btn" onclick="saveSettings()">Save Settings</button>
+          </div>
+        </div>
+      `;
       document.getElementById('app').appendChild(modal);
     }
 
     function saveSettings() { state.googleUrl = document.getElementById('google-url').value; save(); showToast('Settings saved!'); closeModal(); }
-    function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; state.extraCardios = []; save(); render(); }
+    function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; state.extraCardios = []; state.savedSets = {}; save(); render(); }
 
     function syncToGoogle(payload) {
-  return new Promise((resolve) => {
-    const data = encodeURIComponent(JSON.stringify(payload));
-    const img = new Image();
-    img.onload = resolve;
-    img.onerror = resolve; // Resolve anyway - the request still goes through
-    img.src = state.googleUrl + '?data=' + data;
-    setTimeout(resolve, 1000); // Fallback timeout
-  });
-}
+      return new Promise((resolve) => {
+        const data = encodeURIComponent(JSON.stringify(payload));
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve;
+        img.src = state.googleUrl + '?data=' + data;
+        setTimeout(resolve, 1000);
+      });
+    }
 
     async function completeWorkout() {
       state.syncing = true; render();
       const workout = WORKOUTS[state.workoutIndex];
       const timestamp = new Date().toISOString();
 
-      // Get additional exercise data from inputs
       const durationInput = document.getElementById('additional-duration');
       const notesInput = document.getElementById('additional-notes');
       const customNameInput = document.getElementById('additional-custom-name');
@@ -878,42 +1411,38 @@
 
       Object.entries(state.sessionLogs).forEach(([id, data]) => { if (!state.exerciseLogs[id]) state.exerciseLogs[id] = []; state.exerciseLogs[id].push({ date: timestamp, ...data }); });
       
-      if (state.googleUrl && (Object.keys(state.sessionLogs).length || state.additionalExercise.type || state.extraCardios.length)) {
+      if (state.googleUrl && (Object.keys(state.sessionLogs).length || state.additionalExercise.type)) {
         const exercises = [];
-        workout.sections.forEach(section => { section.exercises.forEach(ex => { if (state.sessionLogs[ex.id]) { const logData = state.sessionLogs[ex.id]; let exerciseName = ex.name; if (ex.type === 'bench-choice' && logData.benchType) exerciseName = logData.benchType === 'bb' ? 'Barbell Bench' : 'Dumbbell Bench'; exercises.push({ section: section.name, name: exerciseName, type: ex.type, ...logData }); } }); });
-
-        // Add additional exercise for strength days
-        if (state.additionalExercise.type && state.additionalExercise.duration) {
-          const activityName = state.additionalExercise.type === 'other' ? state.additionalExercise.customName : (state.additionalExercise.type.charAt(0).toUpperCase() + state.additionalExercise.type.slice(1));
-          exercises.push({
-            section: 'Additional Exercise',
-            name: activityName,
-            type: 'cardio',
-            duration: state.additionalExercise.duration,
-            userNotes: state.additionalExercise.notes
-          });
-        }
-
-        // Add extra cardios for cardio days
-        state.extraCardios.forEach(cardio => {
-          if (cardio.type && cardio.duration) {
-            const activityName = cardio.type === 'other' ? cardio.name : (cardio.type.charAt(0).toUpperCase() + cardio.type.slice(1));
-            exercises.push({
-              section: 'Additional Exercise',
-              name: activityName,
-              type: 'cardio',
-              duration: cardio.duration,
-              userNotes: cardio.notes || ''
-            });
-          }
+        workout.sections.forEach(section => { 
+          section.exercises.forEach(ex => { 
+            if (state.sessionLogs[ex.id]) { 
+              const logData = state.sessionLogs[ex.id]; 
+              let exerciseName = ex.name; 
+              if (ex.type === 'bench-choice' && logData.benchType) exerciseName = logData.benchType === 'bb' ? 'Barbell Bench' : 'Dumbbell Bench'; 
+              exercises.push({ name: exerciseName, type: ex.type, ...logData }); 
+            } 
+          }); 
         });
 
+        if (state.additionalExercise.type && state.additionalExercise.duration) {
+          const activityName = state.additionalExercise.type === 'other' ? state.additionalExercise.customName : (state.additionalExercise.type.charAt(0).toUpperCase() + state.additionalExercise.type.slice(1));
+          exercises.push({ name: activityName, type: 'cardio', duration: state.additionalExercise.duration, userNotes: state.additionalExercise.notes });
+        }
+
         try {
-          await syncToGoogle({ workoutName: workout.name, exercises });
-          showToast('Synced to Google Sheets! 💪');
-        } catch (e) { showToast('Saved locally (sync failed)'); }
-      } else { showToast('Workout complete! 💪'); }
-      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; state.extraCardios = []; state.syncing = false; save(); render();
+          await syncToGoogle({ logType: 'exercise', exercises });
+          showToast('Workout synced!');
+        } catch (e) { showToast('Saved locally'); }
+      } else { showToast('Workout complete!'); }
+      
+      state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; 
+      state.sessionLogs = {}; 
+      state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; 
+      state.extraCardios = []; 
+      state.savedSets = {}; 
+      state.syncing = false; 
+      save(); 
+      render();
     }
 
     function showToast(msg) { state.toast = msg; render(); setTimeout(() => { state.toast = null; render(); }, 3000); }
