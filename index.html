@@ -853,22 +853,15 @@
     function skipWorkout() { state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; state.sessionLogs = {}; state.additionalExercise = { type: '', customName: '', duration: '', notes: '' }; state.extraCardios = []; save(); render(); }
 
     function syncToGoogle(payload) {
-      return new Promise((resolve) => {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = state.googleUrl;
-        form.target = 'sync-iframe';
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'data';
-        input.value = JSON.stringify(payload);
-        form.appendChild(input);
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-        setTimeout(resolve, 500);
-      });
-    }
+  return new Promise((resolve) => {
+    const data = encodeURIComponent(JSON.stringify(payload));
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve; // Resolve anyway - the request still goes through
+    img.src = state.googleUrl + '?data=' + data;
+    setTimeout(resolve, 1000); // Fallback timeout
+  });
+}
 
     async function completeWorkout() {
       state.syncing = true; render();
