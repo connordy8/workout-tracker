@@ -93,12 +93,20 @@
     
     .icon-btn:hover { background: var(--border); }
     
+    .day-swipe-area {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-bottom: 16px;
+      touch-action: pan-x;
+      user-select: none;
+    }
+    
     .day-indicator {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 12px;
     }
     
     .day-arrow {
@@ -106,39 +114,32 @@
       height: 36px;
       border-radius: 50%;
       border: none;
-      background: var(--bg-tertiary);
+      background: var(--bg-secondary);
       color: var(--text-secondary);
-      font-size: 16px;
+      font-size: 18px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
     }
     
     .day-arrow:hover { background: var(--border); }
     
     .day-label {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
-      color: var(--text-secondary);
-      min-width: 100px;
+      color: var(--text-primary);
+      min-width: 120px;
       text-align: center;
     }
     
-    .swipe-container {
-      overflow: hidden;
-      touch-action: pan-y;
-    }
-    
-    .swipe-track {
-      display: flex;
-      transition: transform 0.3s ease;
-    }
-    
-    .swipe-slide {
-      min-width: 100%;
-      flex-shrink: 0;
+    .day-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-align: center;
+      margin-top: 8px;
     }
     
     .workout-title {
@@ -360,7 +361,6 @@
     
     .fab:hover { transform: scale(1.1); }
     
-    /* Modal Styles */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -661,7 +661,6 @@
       font-size: 14px;
     }
     
-    /* Log Type Selection */
     .log-type-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -815,7 +814,7 @@
             { id: "calf-raise", name: "Standing Calf Raise", sets: 3, reps: "12-15", notes: "Deep stretch", type: "weighted" }
           ]},
           { name: "Grip", exercises: [
-            { id: "farmers", name: "Farmer's Carry", sets: 2, reps: "1 min", notes: "50% BW each hand", type: "weighted" },
+            { id: "farmers", name: "Farmer's Carry", sets: 2, reps: "1 min", notes: "50% BW each hand", type: "weighted-seconds" },
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
         ]},
@@ -859,7 +858,7 @@
             { id: "seated-calf", name: "Seated Calf Raise", sets: 2, reps: "15-20", notes: "Soleus", type: "weighted" }
           ]},
           { name: "Grip", exercises: [
-            { id: "farmers-b", name: "Farmer's Carry", sets: 2, reps: "1 min", type: "weighted" },
+            { id: "farmers-b", name: "Farmer's Carry", sets: 2, reps: "1 min", type: "weighted-seconds" },
             { id: "dead-hang", name: "Dead Hang", sets: 2, reps: "max", notes: "Goal: 2 min", type: "seconds" }
           ]}
         ]},
@@ -892,34 +891,49 @@
         ]}
     ];
 
+    // Helper to get day-specific storage key
+    function getDayKey(dayIndex) {
+      return `day_${dayIndex}`;
+    }
+
     let state = {
       workoutIndex: parseInt(localStorage.getItem('workoutIndex') || '0'),
       exerciseLogs: JSON.parse(localStorage.getItem('exerciseLogs') || '{}'),
-      sessionLogs: JSON.parse(localStorage.getItem('sessionLogs') || '{}'),
-      inProgressExercises: JSON.parse(localStorage.getItem('inProgressExercises') || '{}'),
+      dayData: JSON.parse(localStorage.getItem('dayData') || '{}'), // Stores per-day session data
       googleUrl: localStorage.getItem('googleUrl') || '',
       currentModal: null,
       syncing: false,
       toast: null,
-      savedSets: JSON.parse(localStorage.getItem('savedSets') || '{}'),
       lastLedDuration: localStorage.getItem('lastLedDuration') || '20 min',
       exerciseVariants: JSON.parse(localStorage.getItem('exerciseVariants') || '{}'),
       touchStartX: 0,
       touchEndX: 0
     };
 
+    // Get current day's data
+    function getCurrentDayData() {
+      const key = getDayKey(state.workoutIndex);
+      if (!state.dayData[key]) {
+        state.dayData[key] = {
+          sessionLogs: {},
+          inProgressExercises: {},
+          savedSets: {}
+        };
+      }
+      return state.dayData[key];
+    }
+
     function save() {
       localStorage.setItem('workoutIndex', state.workoutIndex);
       localStorage.setItem('exerciseLogs', JSON.stringify(state.exerciseLogs));
-      localStorage.setItem('sessionLogs', JSON.stringify(state.sessionLogs));
-      localStorage.setItem('inProgressExercises', JSON.stringify(state.inProgressExercises));
+      localStorage.setItem('dayData', JSON.stringify(state.dayData));
       localStorage.setItem('googleUrl', state.googleUrl);
       localStorage.setItem('lastLedDuration', state.lastLedDuration);
-      localStorage.setItem('savedSets', JSON.stringify(state.savedSets));
       localStorage.setItem('exerciseVariants', JSON.stringify(state.exerciseVariants));
     }
 
     function getOrderedExercises(workout) {
+      const dayData = getCurrentDayData();
       const allExercises = [];
       workout.sections.forEach(section => {
         section.exercises.forEach(ex => {
@@ -927,49 +941,43 @@
         });
       });
       
-      const inProgress = allExercises.filter(ex => state.inProgressExercises[ex.id] && !state.sessionLogs[ex.id]);
-      const notStarted = allExercises.filter(ex => !state.inProgressExercises[ex.id] && !state.sessionLogs[ex.id]);
-      const completed = allExercises.filter(ex => state.sessionLogs[ex.id]);
+      const inProgress = allExercises.filter(ex => dayData.inProgressExercises[ex.id] && !dayData.sessionLogs[ex.id]);
+      const notStarted = allExercises.filter(ex => !dayData.inProgressExercises[ex.id] && !dayData.sessionLogs[ex.id]);
+      const completed = allExercises.filter(ex => dayData.sessionLogs[ex.id]);
       
       return [...inProgress, ...notStarted, ...completed];
     }
 
-    function handleTouchStart(e) {
+    function handleDaySwipeStart(e) {
       state.touchStartX = e.touches[0].clientX;
     }
 
-    function handleTouchMove(e) {
+    function handleDaySwipeMove(e) {
       state.touchEndX = e.touches[0].clientX;
     }
 
-    function handleTouchEnd() {
+    function handleDaySwipeEnd() {
       const diff = state.touchStartX - state.touchEndX;
       if (Math.abs(diff) > 50) {
         if (diff > 0) {
-          // Swipe left - next day
-          state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length;
+          nextDay();
         } else {
-          // Swipe right - previous day
-          state.workoutIndex = (state.workoutIndex - 1 + WORKOUTS.length) % WORKOUTS.length;
+          prevDay();
         }
-        // Clear session data for new day
-        state.sessionLogs = {};
-        state.inProgressExercises = {};
-        state.savedSets = {};
-        save();
-        render();
       }
+      state.touchStartX = 0;
+      state.touchEndX = 0;
     }
 
     function render() {
       const workout = WORKOUTS[state.workoutIndex];
       const catClass = workout.category.toLowerCase();
+      const dayData = getCurrentDayData();
       const orderedExercises = getOrderedExercises(workout);
       
-      // Group by status for display
-      const inProgressList = orderedExercises.filter(ex => state.inProgressExercises[ex.id] && !state.sessionLogs[ex.id]);
-      const notStartedList = orderedExercises.filter(ex => !state.inProgressExercises[ex.id] && !state.sessionLogs[ex.id]);
-      const completedList = orderedExercises.filter(ex => state.sessionLogs[ex.id]);
+      const inProgressList = orderedExercises.filter(ex => dayData.inProgressExercises[ex.id] && !dayData.sessionLogs[ex.id]);
+      const notStartedList = orderedExercises.filter(ex => !dayData.inProgressExercises[ex.id] && !dayData.sessionLogs[ex.id]);
+      const completedList = orderedExercises.filter(ex => dayData.sessionLogs[ex.id]);
       
       let html = `
         <header class="header">
@@ -979,10 +987,13 @@
               <button class="icon-btn" onclick="showSettings()">⚙️</button>
             </div>
           </div>
-          <div class="day-indicator">
-            <button class="day-arrow" onclick="prevDay()">‹</button>
-            <span class="day-label">Day ${state.workoutIndex + 1} of ${WORKOUTS.length}</span>
-            <button class="day-arrow" onclick="nextDay()">›</button>
+          <div class="day-swipe-area" ontouchstart="handleDaySwipeStart(event)" ontouchmove="handleDaySwipeMove(event)" ontouchend="handleDaySwipeEnd()">
+            <div class="day-indicator">
+              <button class="day-arrow" onclick="prevDay()">‹</button>
+              <span class="day-label">Day ${state.workoutIndex + 1} of ${WORKOUTS.length}</span>
+              <button class="day-arrow" onclick="nextDay()">›</button>
+            </div>
+            <div class="day-hint">Swipe or tap arrows to change day</div>
           </div>
           <h1 class="workout-title">${workout.name}</h1>
           <div class="workout-meta">
@@ -994,34 +1005,32 @@
           </div>
         </header>
 
-        <div class="swipe-container" ontouchstart="handleTouchStart(event)" ontouchmove="handleTouchMove(event)" ontouchend="handleTouchEnd()">
-          ${inProgressList.length > 0 ? `
-            <div class="section">
-              <div class="section-header">
-                <span class="section-title">🔄 In Progress</span>
-              </div>
-              ${inProgressList.map(ex => renderExerciseCard(ex, 'in-progress')).join('')}
+        ${inProgressList.length > 0 ? `
+          <div class="section">
+            <div class="section-header">
+              <span class="section-title">🔄 In Progress</span>
             </div>
-          ` : ''}
+            ${inProgressList.map(ex => renderExerciseCard(ex, 'in-progress')).join('')}
+          </div>
+        ` : ''}
 
-          ${notStartedList.length > 0 ? `
-            <div class="section">
-              <div class="section-header">
-                <span class="section-title">⏳ Up Next</span>
-              </div>
-              ${notStartedList.map(ex => renderExerciseCard(ex, '')).join('')}
+        ${notStartedList.length > 0 ? `
+          <div class="section">
+            <div class="section-header">
+              <span class="section-title">⏳ Up Next</span>
             </div>
-          ` : ''}
+            ${notStartedList.map(ex => renderExerciseCard(ex, '')).join('')}
+          </div>
+        ` : ''}
 
-          ${completedList.length > 0 ? `
-            <div class="section">
-              <div class="section-header">
-                <span class="section-title">✅ Completed</span>
-              </div>
-              ${completedList.map(ex => renderExerciseCard(ex, 'logged')).join('')}
+        ${completedList.length > 0 ? `
+          <div class="section">
+            <div class="section-header">
+              <span class="section-title">✅ Completed</span>
             </div>
-          ` : ''}
-        </div>
+            ${completedList.map(ex => renderExerciseCard(ex, 'logged')).join('')}
+          </div>
+        ` : ''}
 
         <button class="fab" onclick="showLogTypeMenu()">+</button>
 
@@ -1043,6 +1052,7 @@
     }
 
     function renderExerciseCard(ex, statusClass) {
+      const dayData = getCurrentDayData();
       const logged = statusClass === 'logged';
       const inProgress = statusClass === 'in-progress';
       const last = getLastLog(ex.id, ex);
@@ -1075,18 +1085,12 @@
 
     function prevDay() {
       state.workoutIndex = (state.workoutIndex - 1 + WORKOUTS.length) % WORKOUTS.length;
-      state.sessionLogs = {};
-      state.inProgressExercises = {};
-      state.savedSets = {};
       save();
       render();
     }
 
     function nextDay() {
       state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length;
-      state.sessionLogs = {};
-      state.inProgressExercises = {};
-      state.savedSets = {};
       save();
       render();
     }
@@ -1149,8 +1153,8 @@
               <button class="activity-btn ${state.additionalExercise?.type === 'class' ? 'active' : ''}" onclick="setAdditionalType('class', 'Class')">🧘 Class</button>
               <button class="activity-btn ${state.additionalExercise?.type === 'other' ? 'active' : ''}" onclick="setAdditionalType('other', '')">✏️ Other</button>
             </div>
-            ${state.additionalExercise?.type === 'other' ? `<input type="text" class="input-field" id="additional-custom-name" placeholder="Activity name" value="${state.additionalExercise?.customName || ''}">` : ''}
-            <input type="text" class="input-field" id="additional-duration" placeholder="Duration (e.g., 30 min)" value="${state.additionalExercise?.duration || ''}">
+            ${state.additionalExercise?.type === 'other' ? `<input type="text" class="input-field" id="additional-custom-name" placeholder="Activity name" value="${state.additionalExercise?.customName || ''}" onfocus="this.select()">` : ''}
+            <input type="text" class="input-field" id="additional-duration" placeholder="Duration (e.g., 30 min)" value="${state.additionalExercise?.duration || ''}" onfocus="this.select()">
             <textarea class="notes-area" id="additional-notes" placeholder="Notes (optional)">${state.additionalExercise?.notes || ''}</textarea>
           </div>
           <div class="modal-footer">
@@ -1285,13 +1289,13 @@
               </div>
             </div>
             ${state.beautyEvent?.type === 'botox' ? `
-              <input type="text" class="input-field" id="beauty-details" placeholder="Units (e.g., 40 units Dysport)" value="${state.beautyEvent?.details || ''}">
+              <input type="text" class="input-field" id="beauty-details" placeholder="Units (e.g., 40 units Dysport)" value="${state.beautyEvent?.details || ''}" onfocus="this.select()">
             ` : ''}
             ${state.beautyEvent?.type === 'led' ? `
-              <input type="text" class="input-field" id="beauty-duration" placeholder="Duration" value="${state.beautyEvent?.duration || state.lastLedDuration}">
+              <input type="text" class="input-field" id="beauty-duration" placeholder="Duration" value="${state.beautyEvent?.duration || state.lastLedDuration}" onfocus="this.select()">
             ` : ''}
             ${state.beautyEvent?.type === 'other' ? `
-              <input type="text" class="input-field" id="beauty-custom" placeholder="Treatment name" value="${state.beautyEvent?.customName || ''}">
+              <input type="text" class="input-field" id="beauty-custom" placeholder="Treatment name" value="${state.beautyEvent?.customName || ''}" onfocus="this.select()">
             ` : ''}
             <textarea class="notes-area" id="beauty-notes" placeholder="Notes (optional)">${state.beautyEvent?.notes || ''}</textarea>
           </div>
@@ -1344,6 +1348,10 @@
         if (last.sets && last.sets.length) return last.sets.map(s => s.seconds ? `${s.seconds}s` : '').filter(Boolean).join(', ') || 'Completed';
         return 'Completed';
       }
+      if (ex.type === 'weighted-seconds') {
+        if (last.sets && last.sets.length) return last.sets.map(s => s.weight && s.seconds ? `${s.weight}lbs × ${s.seconds}s` : '').filter(Boolean).join(', ') || 'Completed';
+        return 'Completed';
+      }
       if (last.sets && last.sets.length) return last.sets.map(s => s.weight && s.reps ? `${s.weight}×${s.reps}` : '').filter(Boolean).join(', ') || 'Completed';
       return 'Completed';
     }
@@ -1355,7 +1363,9 @@
 
     function openExercise(id) { 
       state.currentModal = id; 
-      if (!state.savedSets[id]) state.savedSets[id] = {};
+      const dayData = getCurrentDayData();
+      if (!dayData.savedSets[id]) dayData.savedSets[id] = {};
+      save();
       render(); 
     }
     
@@ -1365,16 +1375,18 @@
     function renderExerciseModal(id) {
       const ex = getExercise(id);
       if (!ex) return;
+      const dayData = getCurrentDayData();
       const isCardio = ex.type === 'cardio';
       const isSeconds = ex.type === 'seconds';
+      const isWeightedSeconds = ex.type === 'weighted-seconds';
       const isBenchChoice = ex.type === 'bench-choice';
       const isCurlChoice = ex.type === 'curl-choice';
-      const current = state.inProgressExercises[id] || state.sessionLogs[id];
+      const current = dayData.inProgressExercises[id] || dayData.sessionLogs[id];
       const lastLog = state.exerciseLogs[id]?.[state.exerciseLogs[id].length - 1];
       const icon = getExerciseIcon(ex.id);
       const currentNotes = current?.userNotes || '';
       const currentVariant = state.exerciseVariants[id] || (isBenchChoice ? 'Flat' : (isCurlChoice ? 'Incline' : ''));
-      const savedSets = state.savedSets[id] || {};
+      const savedSets = dayData.savedSets[id] || {};
       
       let variantSelector = '';
       if (isBenchChoice) {
@@ -1413,6 +1425,20 @@
             <button class="set-save-btn ${savedSets[i] ? 'saved' : ''}" onclick="saveSet('${id}', ${i}, 'seconds')">${savedSets[i] ? '✓' : 'Save'}</button>
           </div>
         `).join('')}</div><button class="add-set-btn" onclick="addSetSeconds()">+ Add Set</button>`;
+      } else if (isWeightedSeconds) {
+        const numSets = ex.sets;
+        let sets = current?.sets || [];
+        if (!sets.length) for (let i = 0; i < numSets; i++) sets.push({ weight: lastLog?.sets?.[i]?.weight || '', seconds: lastLog?.sets?.[i]?.seconds || '' });
+        setsHtml = `<div id="sets-container">${sets.map((s, i) => `
+          <div class="set-row ${savedSets[i] ? 'saved' : ''}" id="set-row-${i}">
+            <span class="set-number">Set ${i + 1}</span>
+            <input type="number" class="set-input" data-set="${i}" data-field="weight" value="${s.weight}" placeholder="lbs" onchange="autoPopulate(${i}, 'weight')" onfocus="this.select()">
+            <span class="set-divider">×</span>
+            <input type="number" class="set-input" data-set="${i}" data-field="seconds" value="${s.seconds}" placeholder="sec" onchange="autoPopulateSeconds(${i})" onfocus="this.select()">
+            <span class="set-divider">sec</span>
+            <button class="set-save-btn ${savedSets[i] ? 'saved' : ''}" onclick="saveSet('${id}', ${i}, 'weighted-seconds')">${savedSets[i] ? '✓' : 'Save'}</button>
+          </div>
+        `).join('')}</div><button class="add-set-btn" onclick="addSetWeightedSeconds()">+ Add Set</button>`;
       } else {
         const numSets = ex.sets;
         let sets = current?.sets || [];
@@ -1432,6 +1458,7 @@
       if (lastLog) {
         if (isCardio) lastDisplay = lastLog.duration || 'Completed';
         else if (isSeconds) lastDisplay = lastLog.sets?.map((s, i) => `${s.seconds}s`).join(', ') || 'Completed';
+        else if (isWeightedSeconds) lastDisplay = lastLog.sets?.map(s => `${s.weight}lbs × ${s.seconds}s`).join(', ') || 'Completed';
         else lastDisplay = lastLog.sets?.map(s => `${s.weight}×${s.reps}`).join(', ') || 'Completed';
       }
 
@@ -1473,11 +1500,13 @@
     }
 
     function saveInProgress(id, type) {
-      // Save current state as in-progress
+      const dayData = getCurrentDayData();
+      const userNotes = document.getElementById('user-notes-input')?.value.trim() || '';
+      
       if (type === 'cardio') {
         const duration = document.getElementById('duration-input')?.value || '';
         if (duration) {
-          state.inProgressExercises[id] = { duration };
+          dayData.inProgressExercises[id] = { duration, userNotes };
         }
       } else if (type === 'seconds') {
         const inputs = document.querySelectorAll('#sets-container .set-input');
@@ -1488,7 +1517,19 @@
           sets[setIdx].seconds = input.value; 
         });
         if (sets.some(s => s.seconds)) {
-          state.inProgressExercises[id] = { sets };
+          dayData.inProgressExercises[id] = { sets, userNotes };
+        }
+      } else if (type === 'weighted-seconds') {
+        const inputs = document.querySelectorAll('#sets-container .set-input');
+        const sets = [];
+        inputs.forEach(input => { 
+          const setIdx = parseInt(input.dataset.set); 
+          const field = input.dataset.field; 
+          if (!sets[setIdx]) sets[setIdx] = {}; 
+          sets[setIdx][field] = input.value; 
+        });
+        if (sets.some(s => s.weight || s.seconds)) {
+          dayData.inProgressExercises[id] = { sets, userNotes };
         }
       } else {
         const inputs = document.querySelectorAll('#sets-container .set-input');
@@ -1500,23 +1541,23 @@
           sets[setIdx][field] = input.value; 
         });
         if (sets.some(s => s.weight || s.reps)) {
-          state.inProgressExercises[id] = { sets };
+          dayData.inProgressExercises[id] = { sets, userNotes };
         }
       }
       save();
     }
 
     function autoPopulate(changedSetIndex, field) {
+      const dayData = getCurrentDayData();
       const changedInput = document.querySelector(`input[data-set="${changedSetIndex}"][data-field="${field}"]`);
       const value = changedInput?.value;
       if (!value) return;
       
-      // Update all subsequent sets that are NOT saved yet
       const allInputs = document.querySelectorAll(`input[data-field="${field}"]`);
       allInputs.forEach(input => {
         const setIdx = parseInt(input.dataset.set);
         const exerciseId = state.currentModal;
-        const savedSets = state.savedSets[exerciseId] || {};
+        const savedSets = dayData.savedSets[exerciseId] || {};
         if (setIdx > changedSetIndex && !savedSets[setIdx]) {
           input.value = value;
         }
@@ -1524,6 +1565,7 @@
     }
 
     function autoPopulateSeconds(changedSetIndex) {
+      const dayData = getCurrentDayData();
       const changedInput = document.querySelector(`input[data-set="${changedSetIndex}"][data-field="seconds"]`);
       const value = changedInput?.value;
       if (!value) return;
@@ -1532,7 +1574,7 @@
       allInputs.forEach(input => {
         const setIdx = parseInt(input.dataset.set);
         const exerciseId = state.currentModal;
-        const savedSets = state.savedSets[exerciseId] || {};
+        const savedSets = dayData.savedSets[exerciseId] || {};
         if (setIdx > changedSetIndex && !savedSets[setIdx]) {
           input.value = value;
         }
@@ -1540,32 +1582,42 @@
     }
 
     function saveSet(exerciseId, setIndex, type) {
+      const dayData = getCurrentDayData();
       const row = document.getElementById(`set-row-${setIndex}`);
+      
       if (type === 'seconds') {
         const secondsInput = document.querySelector(`input[data-set="${setIndex}"][data-field="seconds"]`);
         if (secondsInput.value) {
-          state.savedSets[exerciseId] = state.savedSets[exerciseId] || {};
-          state.savedSets[exerciseId][setIndex] = { seconds: secondsInput.value };
+          dayData.savedSets[exerciseId] = dayData.savedSets[exerciseId] || {};
+          dayData.savedSets[exerciseId][setIndex] = { seconds: secondsInput.value };
           row.classList.add('saved');
           row.querySelector('.set-save-btn').textContent = '✓';
           row.querySelector('.set-save-btn').classList.add('saved');
-          
-          // Mark as in progress
-          state.inProgressExercises[exerciseId] = state.inProgressExercises[exerciseId] || {};
+          dayData.inProgressExercises[exerciseId] = dayData.inProgressExercises[exerciseId] || {};
+          save();
+        }
+      } else if (type === 'weighted-seconds') {
+        const weightInput = document.querySelector(`input[data-set="${setIndex}"][data-field="weight"]`);
+        const secondsInput = document.querySelector(`input[data-set="${setIndex}"][data-field="seconds"]`);
+        if (weightInput.value || secondsInput.value) {
+          dayData.savedSets[exerciseId] = dayData.savedSets[exerciseId] || {};
+          dayData.savedSets[exerciseId][setIndex] = { weight: weightInput.value, seconds: secondsInput.value };
+          row.classList.add('saved');
+          row.querySelector('.set-save-btn').textContent = '✓';
+          row.querySelector('.set-save-btn').classList.add('saved');
+          dayData.inProgressExercises[exerciseId] = dayData.inProgressExercises[exerciseId] || {};
           save();
         }
       } else {
         const weightInput = document.querySelector(`input[data-set="${setIndex}"][data-field="weight"]`);
         const repsInput = document.querySelector(`input[data-set="${setIndex}"][data-field="reps"]`);
         if (weightInput.value || repsInput.value) {
-          state.savedSets[exerciseId] = state.savedSets[exerciseId] || {};
-          state.savedSets[exerciseId][setIndex] = { weight: weightInput.value, reps: repsInput.value };
+          dayData.savedSets[exerciseId] = dayData.savedSets[exerciseId] || {};
+          dayData.savedSets[exerciseId][setIndex] = { weight: weightInput.value, reps: repsInput.value };
           row.classList.add('saved');
           row.querySelector('.set-save-btn').textContent = '✓';
           row.querySelector('.set-save-btn').classList.add('saved');
-          
-          // Mark as in progress
-          state.inProgressExercises[exerciseId] = state.inProgressExercises[exerciseId] || {};
+          dayData.inProgressExercises[exerciseId] = dayData.inProgressExercises[exerciseId] || {};
           save();
         }
       }
@@ -1591,26 +1643,41 @@
       container.appendChild(div);
     }
 
+    function addSetWeightedSeconds() {
+      const container = document.getElementById('sets-container');
+      const count = container.querySelectorAll('.set-row').length;
+      const div = document.createElement('div');
+      div.className = 'set-row';
+      div.id = `set-row-${count}`;
+      div.innerHTML = `<span class="set-number">Set ${count + 1}</span><input type="number" class="set-input" data-set="${count}" data-field="weight" placeholder="lbs" onchange="autoPopulate(${count}, 'weight')" onfocus="this.select()"><span class="set-divider">×</span><input type="number" class="set-input" data-set="${count}" data-field="seconds" placeholder="sec" onchange="autoPopulateSeconds(${count})" onfocus="this.select()"><span class="set-divider">sec</span><button class="set-save-btn" onclick="saveSet('${state.currentModal}', ${count}, 'weighted-seconds')">Save</button>`;
+      container.appendChild(div);
+    }
+
     function saveExercise(id, type) {
+      const dayData = getCurrentDayData();
       const userNotes = document.getElementById('user-notes-input')?.value.trim() || '';
       const variant = state.exerciseVariants[id];
       
       if (type === 'cardio') {
-        state.sessionLogs[id] = { duration: document.getElementById('duration-input').value, userNotes };
+        dayData.sessionLogs[id] = { duration: document.getElementById('duration-input').value, userNotes };
       } else if (type === 'seconds') {
         const inputs = document.querySelectorAll('#sets-container .set-input');
         const sets = [];
         inputs.forEach(input => { const setIdx = parseInt(input.dataset.set); if (!sets[setIdx]) sets[setIdx] = {}; sets[setIdx].seconds = input.value; });
-        state.sessionLogs[id] = { sets: sets.filter(s => s.seconds), userNotes, variant };
+        dayData.sessionLogs[id] = { sets: sets.filter(s => s.seconds), userNotes, variant };
+      } else if (type === 'weighted-seconds') {
+        const inputs = document.querySelectorAll('#sets-container .set-input');
+        const sets = [];
+        inputs.forEach(input => { const setIdx = parseInt(input.dataset.set); const field = input.dataset.field; if (!sets[setIdx]) sets[setIdx] = {}; sets[setIdx][field] = input.value; });
+        dayData.sessionLogs[id] = { sets: sets.filter(s => s.weight || s.seconds), userNotes, variant };
       } else {
         const inputs = document.querySelectorAll('#sets-container .set-input');
         const sets = [];
         inputs.forEach(input => { const setIdx = parseInt(input.dataset.set); const field = input.dataset.field; if (!sets[setIdx]) sets[setIdx] = {}; sets[setIdx][field] = input.value; });
-        state.sessionLogs[id] = { sets: sets.filter(s => s.weight || s.reps), userNotes, variant };
+        dayData.sessionLogs[id] = { sets: sets.filter(s => s.weight || s.reps), userNotes, variant };
       }
       
-      // Remove from in-progress
-      delete state.inProgressExercises[id];
+      delete dayData.inProgressExercises[id];
       save();
       closeModal();
     }
@@ -1654,19 +1721,20 @@
     async function completeWorkout() {
       state.syncing = true; render();
       const workout = WORKOUTS[state.workoutIndex];
+      const dayData = getCurrentDayData();
       const timestamp = new Date().toISOString();
 
-      Object.entries(state.sessionLogs).forEach(([id, data]) => { 
+      Object.entries(dayData.sessionLogs).forEach(([id, data]) => { 
         if (!state.exerciseLogs[id]) state.exerciseLogs[id] = []; 
         state.exerciseLogs[id].push({ date: timestamp, ...data }); 
       });
       
-      if (state.googleUrl && Object.keys(state.sessionLogs).length) {
+      if (state.googleUrl && Object.keys(dayData.sessionLogs).length) {
         const exercises = [];
         workout.sections.forEach(section => { 
           section.exercises.forEach(ex => { 
-            if (state.sessionLogs[ex.id]) { 
-              const logData = state.sessionLogs[ex.id];
+            if (dayData.sessionLogs[ex.id]) { 
+              const logData = dayData.sessionLogs[ex.id];
               const variant = state.exerciseVariants[ex.id];
               let exerciseName = ex.name;
               
@@ -1687,10 +1755,11 @@
         } catch (e) { showToast('Saved locally'); }
       } else { showToast('Workout complete!'); }
       
+      // Clear this day's data
+      const key = getDayKey(state.workoutIndex);
+      state.dayData[key] = { sessionLogs: {}, inProgressExercises: {}, savedSets: {} };
+      
       state.workoutIndex = (state.workoutIndex + 1) % WORKOUTS.length; 
-      state.sessionLogs = {}; 
-      state.inProgressExercises = {};
-      state.savedSets = {}; 
       state.syncing = false; 
       save(); 
       render();
